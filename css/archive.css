@@ -1,0 +1,27 @@
+.archivemain {
+  margin-left: 20%;
+  margin-right: 20%;
+}
+.archiveitem {
+  padding-top: 1%;
+  min-height: 30pt;
+}
+.archiveitem > .archiveitemtitle {
+  float: left;
+  font-size: medium;
+}
+.archiveitem > .archiveitemtitle > a {
+  color: #000;
+  font-family: serif;
+}
+.archiveitem > .archiveitemdate {
+  float: right;
+}
+.archivepaginator {
+  margin-left: 20%;
+  margin-right: 20%;
+  padding-top: 2%;
+  font-size: large;
+  font-weight: bold;
+  font-family: monospace;
+}
