@@ -17,8 +17,8 @@
 .header_nav > ul > li {
   float: left;
   padding: 5px;
-  font-family: serif;
-  font-size: xx-large;
+  font-family: cursive;
+  font-size: large;
   text-align: center;
   cursor: pointer;
 }
@@ -29,5 +29,21 @@
 .site_content {
   float: left;
   width: 100%;
-  height: 60%;
+  height: 65%;
+  overflow: scroll;
+}
+/* post footer */
+.site_footer {
+  float: left;
+  width: 100%;
+  height: 5%;
+}
+.copyright {
+  text-align: center;
+  text-transform: capitalize;
+  font-family: cursive;
+}
+.copyright > p {
+  margin: 0;
+  padding: 0;
 }
