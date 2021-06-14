@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>
+        Large World! Small Me!
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            《TCP/IP详解卷一》读后感
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h2 id="IP地址"><a href="#IP地址" class="headerlink" title="IP地址"></a>IP地址</h2><div class="table-container">
+<table>
+<thead>
+<tr>
+<th>IPv4</th>
+<th>32bit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IPv6</td>
+<td>128bit</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">类型</th>
+<th style="text-align:center">地址范围</th>
+<th style="text-align:center">高序位</th>
+<th style="text-align:center">CIDR</th>
+<th style="text-align:center">网络数</th>
+<th style="text-align:center">主机数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">A</td>
+<td style="text-align:center">0.0.0.0~127.255.255.255</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">/8</td>
+<td style="text-align:center">128</td>
+<td style="text-align:center">16777216</td>
+</tr>
+<tr>
+<td style="text-align:center">B</td>
+<td style="text-align:center">128.0.0.0~191.255.255.255</td>
+<td style="text-align:center">10</td>
+<td style="text-align:center">/16</td>
+<td style="text-align:center">16384</td>
+<td style="text-align:center">65536</td>
+</tr>
+<tr>
+<td style="text-align:center">C</td>
+<td style="text-align:center">192.0.0.0~223.255.255.255</td>
+<td style="text-align:center">110</td>
+<td style="text-align:center">/24</td>
+<td style="text-align:center">2097152</td>
+<td style="text-align:center">256</td>
+</tr>
+<tr>
+<td style="text-align:center">D</td>
+<td style="text-align:center">224.0.0.0~239.255.255.255</td>
+<td style="text-align:center">1110</td>
+<td style="text-align:center">/4</td>
+<td style="text-align:center">N/A</td>
+<td style="text-align:center">N/A</td>
+</tr>
+<tr>
+<td style="text-align:center">E</td>
+<td style="text-align:center">240.0.0.0~255.255.255.255</td>
+<td style="text-align:center">1111</td>
+<td style="text-align:center">/4</td>
+<td style="text-align:center">N/A</td>
+<td style="text-align:center">N/A</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="IP地址分类被称为”分类网络”或称”分类寻址”-是1993形成的一个网络体系术语。"><a href="#IP地址分类被称为”分类网络”或称”分类寻址”-是1993形成的一个网络体系术语。" class="headerlink" title="IP地址分类被称为”分类网络”或称”分类寻址”, 是1993形成的一个网络体系术语。"></a>IP地址分类被称为”分类网络”或称”分类寻址”, 是1993形成的一个网络体系术语。</h3><h3 id="A类地址网络数和主机数如何计算的？"><a href="#A类地址网络数和主机数如何计算的？" class="headerlink" title="A类地址网络数和主机数如何计算的？"></a>A类地址网络数和主机数如何计算的？</h3><p>00000000.00000000.00000000.00000000<br>01111111.11111111.11111111.11111111<br>网络数=<script type="math/tex">2^7</script>=128    主机数=<script type="math/tex">2^{24}</script>=16777216 </p>
+<h3 id="B类地址网络数和主机数如何计算的？"><a href="#B类地址网络数和主机数如何计算的？" class="headerlink" title="B类地址网络数和主机数如何计算的？"></a>B类地址网络数和主机数如何计算的？</h3><p>10000000.00000000.00000000.00000000<br>10111111.11111111.11111111.11111111<br>网络数=<script type="math/tex">2^{14}</script>=16384   主机数=<script type="math/tex">2^{16}</script>=65536</p>
+<h3 id="C类地址网络数和主机数如何计算的？"><a href="#C类地址网络数和主机数如何计算的？" class="headerlink" title="C类地址网络数和主机数如何计算的？"></a>C类地址网络数和主机数如何计算的？</h3><p>11000000.00000000.00000000.00000000<br>11011111.11111111.11111111.11111111<br>网络数=<script type="math/tex">2^{21}</script>=2097152   主机数=<script type="math/tex">2^8</script>=256</p>
+<h5 id="注意通常全为0和全为1的地址有特殊作用，通常不使用"><a href="#注意通常全为0和全为1的地址有特殊作用，通常不使用" class="headerlink" title="注意通常全为0和全为1的地址有特殊作用，通常不使用"></a>注意通常全为0和全为1的地址有特殊作用，通常不使用</h5><p>在20世纪80年代，随着局域网LAN的发展和增加, 由于Internet管理问题，衍生出子网寻址方式。<br>在不改变Internet核心路由基础设施的情况下， 将网络号分配给站点。站点管理员通过子网划分<br>来管理站点主机配置，提高灵活性。</p>
+<p>IPv4地址 = 网络号 + 子网ID + 主机ID</p>
+<p>给定IPv4的地址，如果想知道该网络号地址, 怎么办??? <u><strong>子网掩码</strong></u>登场</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">点分十进制</th>
+<th style="text-align:center">前缀长度</th>
+<th style="text-align:center">二进制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">128.0.0.0</td>
+<td style="text-align:center">/1</td>
+<td style="text-align:center">10000000.00000000.00000000.0000000</td>
+</tr>
+<tr>
+<td style="text-align:center">255.0.0.0</td>
+<td style="text-align:center">/8</td>
+<td style="text-align:center">11111111.00000000.00000000.0000000</td>
+</tr>
+<tr>
+<td style="text-align:center">255.192.0.0</td>
+<td style="text-align:center">/10</td>
+<td style="text-align:center">11111111.11000000.00000000.00000000</td>
+</tr>
+<tr>
+<td style="text-align:center">255.255.0.0</td>
+<td style="text-align:center">/16</td>
+<td style="text-align:center">11111111.11111111.00000000.00000000</td>
+</tr>
+<tr>
+<td style="text-align:center">255.255.254.0</td>
+<td style="text-align:center">/23</td>
+<td style="text-align:center">11111111.11111111.11111110.00000000</td>
+</tr>
+<tr>
+<td style="text-align:center">255.255.255.192</td>
+<td style="text-align:center">/25</td>
+<td style="text-align:center">11111111.11111111.11111111.10000000</td>
+</tr>
+<tr>
+<td style="text-align:center">255.255.255.255</td>
+<td style="text-align:center">/32</td>
+<td style="text-align:center">11111111.11111111.11111111.11111111</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">内网地址</th>
+<th style="text-align:center">范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">A</td>
+<td style="text-align:center">10.0.0.0~10.255.255.255</td>
+</tr>
+<tr>
+<td style="text-align:center">B</td>
+<td style="text-align:center">172.16.0.0~172.31.255.255</td>
+</tr>
+<tr>
+<td style="text-align:center">C</td>
+<td style="text-align:center">192.168.0.0~192.168.255.255</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="链路层-IEEE802-局域网-城域网标准"><a href="#链路层-IEEE802-局域网-城域网标准" class="headerlink" title="链路层 IEEE802 局域网/城域网标准"></a>链路层 IEEE802 局域网/城域网标准</h2><div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">名称</th>
+<th style="text-align:center">描述</th>
+<th style="text-align:center">官方参考</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">802.1ak</td>
+<td style="text-align:center">多注册协议(MRP)</td>
+<td style="text-align:center">[802.1AK-2007]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.1AE</td>
+<td style="text-align:center">MACK安全(MACSec)</td>
+<td style="text-align:center">[802.1AE-2006]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.1AX</td>
+<td style="text-align:center">链路聚合</td>
+<td style="text-align:center">[802.1AX-2008]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.1d</td>
+<td style="text-align:center">MAC网桥</td>
+<td style="text-align:center">[802.1D-2004]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.1p</td>
+<td style="text-align:center">流量类/优先级/QoS</td>
+<td style="text-align:center">[802.1D-2004]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.1q</td>
+<td style="text-align:center">虚拟网桥的局域网/MRP的更正</td>
+<td style="text-align:center">[802.1Q-2005/Corl-2008]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.1s</td>
+<td style="text-align:center">多生成树协议(MSTP)</td>
+<td style="text-align:center">[802.1Q-2005]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.1w</td>
+<td style="text-align:center">快速生成树协议(RSTP)</td>
+<td style="text-align:center">[802.1D-2004]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.1X</td>
+<td style="text-align:center">基于端口的网络控制协议(PNAC)</td>
+<td style="text-align:center">[802.1X-2010]</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>802.2</strong></td>
+<td style="text-align:center">逻辑链路控制(LLC)</td>
+<td style="text-align:center">[802.2-1998]</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>802.3</strong></td>
+<td style="text-align:center">基本以太网和10Mb/s以太网</td>
+<td style="text-align:center">[802.3-2008(第1节)]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.3u</td>
+<td style="text-align:center">100Mb/s以太网(快速以太网)</td>
+<td style="text-align:center">[802.3-2008(第2节)]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.3x</td>
+<td style="text-align:center">全双工运行和流量控制</td>
+<td style="text-align:center">[802.3-2008]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.3z/802.3ab</td>
+<td style="text-align:center">1000Mb/s以太网</td>
+<td style="text-align:center">[802.3-2008(第3节)]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.3ae</td>
+<td style="text-align:center">10Gb/s以太网</td>
+<td style="text-align:center">[802.3-2008(第4节)]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.3ad</td>
+<td style="text-align:center">链路聚合</td>
+<td style="text-align:center">[802.1AX-2008]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.3af</td>
+<td style="text-align:center">以太网供电(PoE,15.4W)</td>
+<td style="text-align:center">[802.3-2008(第2节)]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.3ah</td>
+<td style="text-align:center">以太网接入(第一公里以太网)</td>
+<td style="text-align:center">[802.3-2008(第5节)]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.3as</td>
+<td style="text-align:center">帧格式扩展(2000字节)</td>
+<td style="text-align:center">[802.3-2008]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.3at</td>
+<td style="text-align:center">以太网供电增强(PoE+ 30W)</td>
+<td style="text-align:center">[802.3at-2009]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.3ba</td>
+<td style="text-align:center">40/100Gb/s以太网</td>
+<td style="text-align:center">[802.3ba-2010]</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>802.11a</strong></td>
+<td style="text-align:center">运行在5GzHz的54Mb/s的无线局域网</td>
+<td style="text-align:center">[802.11-2007]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.11b</td>
+<td style="text-align:center">运行在2.4GzHz的11Mb/s的无线局域网</td>
+<td style="text-align:center">[802.11-2007]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.11e</td>
+<td style="text-align:center">针对802.11的QoS增强</td>
+<td style="text-align:center">[802.11-2007]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.11g</td>
+<td style="text-align:center">运行在2.4GzHz的54Mb/s的无线局域网</td>
+<td style="text-align:center">[802.11-2007]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.11i</td>
+<td style="text-align:center">安全增强/代替WEP</td>
+<td style="text-align:center">[802.11-2007]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.11j</td>
+<td style="text-align:center">运行在4.9～5.0GHz(日本)</td>
+<td style="text-align:center">[802.11-2007]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.11y</td>
+<td style="text-align:center">运行在3.7GHz的54Mb/s的无限局域网</td>
+<td style="text-align:center">[802.11-2007]</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>802.16</strong></td>
+<td style="text-align:center">微波存取全球互通技术(WiMAX)</td>
+<td style="text-align:center">[802.16-2009]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.16d</td>
+<td style="text-align:center">固定的无限城域网标准(WiMAX)</td>
+<td style="text-align:center">[802.16-2009]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.16e</td>
+<td style="text-align:center">固定/移动的无线城域网标准(WiMAX)</td>
+<td style="text-align:center">[802.16-2009]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.16h</td>
+<td style="text-align:center">改进的共存机制</td>
+<td style="text-align:center">[802.16h-2010]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.16j</td>
+<td style="text-align:center">802.16中的多跳中继</td>
+<td style="text-align:center">[802.16j-2009]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.16k</td>
+<td style="text-align:center">802.16网桥</td>
+<td style="text-align:center">[802.16k-2007]</td>
+</tr>
+<tr>
+<td style="text-align:center">802.21</td>
+<td style="text-align:center">介质无关切换</td>
+<td style="text-align:center">[802.21-2008]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>以太网(802.3)帧格式</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">前导</th>
+<th style="text-align:center">SFD</th>
+<th style="text-align:center">DST</th>
+<th style="text-align:center">SRC</th>
+<th style="text-align:center">长度或类型</th>
+<th style="text-align:center">P/Q标签</th>
+<th style="text-align:center">其他标签</th>
+<th style="text-align:center">上层有效负载</th>
+<th style="text-align:center">填充</th>
+<th style="text-align:center">FCS</th>
+<th style="text-align:center">载体扩展</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">7个字节</td>
+<td style="text-align:center">帧起始分隔符0XAB</td>
+<td style="text-align:center">6个字节</td>
+<td style="text-align:center">6个字节</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center">1500字节</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">CRC校验</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>48Bit MAC地址 与 32Bit IP地址映射 ARP</p>
+<h2 id="Internet-协议"><a href="#Internet-协议" class="headerlink" title="Internet 协议"></a>Internet 协议</h2><p><img src="/images/ipv4.png" alt="ipv4"></p>
+<h5 id="ipv4-wiki"><a href="#ipv4-wiki" class="headerlink" title="ipv4 wiki"></a><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/IPv4">ipv4 wiki</a></h5><div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">字段</th>
+<th style="text-align:center">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Version</td>
+<td style="text-align:center">4</td>
+</tr>
+<tr>
+<td style="text-align:center">IHL</td>
+<td style="text-align:center">Internet Header Length, 4Bytes. 每bit表示4个字节</td>
+</tr>
+<tr>
+<td style="text-align:center">DS/ECN</td>
+<td style="text-align:center">ToS(Type of Service)</td>
+</tr>
+<tr>
+<td style="text-align:center">Total Length</td>
+<td style="text-align:center"><script type="math/tex">2^{16}</script>=65536</td>
+</tr>
+<tr>
+<td style="text-align:center">Identification</td>
+<td style="text-align:center">分片标识数据包</td>
+</tr>
+<tr>
+<td style="text-align:center">Flags/Fragment Offset</td>
+<td style="text-align:center">分片</td>
+</tr>
+<tr>
+<td style="text-align:center">Time to Live</td>
+<td style="text-align:center">ttl—/route. ttl &lt;= 0 丢包</td>
+</tr>
+<tr>
+<td style="text-align:center">Protocol</td>
+<td style="text-align:center">tcp/udp/ip</td>
+</tr>
+<tr>
+<td style="text-align:center">Header Checksum</td>
+<td style="text-align:center">头部校验和</td>
+</tr>
+<tr>
+<td style="text-align:center">SrcIP</td>
+<td style="text-align:center">源IP</td>
+</tr>
+<tr>
+<td style="text-align:center">DstIP</td>
+<td style="text-align:center">目的IP</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="DS-ECN"><a href="#DS-ECN" class="headerlink" title="DS  ECN"></a>DS  ECN</h4><div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">优先级 3bit</th>
+<th style="text-align:center">D</th>
+<th style="text-align:center">T</th>
+<th style="text-align:center">R</th>
+<th style="text-align:center">保留2 bit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">000-111</td>
+<td style="text-align:center">低延迟</td>
+<td style="text-align:center">吞吐量</td>
+<td style="text-align:center">可靠性</td>
+<td style="text-align:center">保留</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>从IPv4协议的定义可以总结以下几点:<br>1: IPv4不保证数据可靠性。协议不存储任何状态数据<br>2: IPv4不保证数据准确性。协议存在头部校验,无数据校验<br>3: IPv4固定头部长度20字节</p>
+<h2 id="UDP"><a href="#UDP" class="headerlink" title="UDP"></a>UDP</h2><p><img src="/images/udp.png" alt="udp"></p>
+<h5 id="udp-wiki"><a href="#udp-wiki" class="headerlink" title="udp wiki"></a><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/User_Datagram_Protocol">udp wiki</a></h5><div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">字段</th>
+<th style="text-align:center">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">SrcPort</td>
+<td style="text-align:center">源端口0~65535</td>
+</tr>
+<tr>
+<td style="text-align:center">DstProt</td>
+<td style="text-align:center">目的端口0~65535</td>
+</tr>
+<tr>
+<td style="text-align:center">Length</td>
+<td style="text-align:center">总长度(UDP头部+UDP数据长度)</td>
+</tr>
+<tr>
+<td style="text-align:center">Checksum</td>
+<td style="text-align:center">校验和</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>从UDP协议的定义可以总结以下几点:<br>1: UDP不保证数据可靠性。协议不存储任何状态数据<br>2: UDP不保证数据准确性。协议存在头部校验,无数据校验<br>3: UDP固定头部长度8字节<br>4: UDP缺少流控机制，存在高速流量冲击影响其他网络用户的风险</p>
+<h4 id="UDP-IPv4-分组"><a href="#UDP-IPv4-分组" class="headerlink" title="UDP/IPv4 分组"></a>UDP/IPv4 分组</h4><p>由于链路层每帧存在最大长度的上限。为了保证IP数据报抽象与链路层细节的一致与分离，IP引入分片与重组。<br>当准备发送IP数据报时,内核根据路由表寻找出口设备以及该设备的MTU。<br>1： len(IP Packet) &gt; MTU 分片与重组. 分片与重组 依靠IPv4协议中Identification, Fragment Offset, Flags字段<br>2:  len(IP Packet) &lt; MTU 直接发送<br>直到达到最终目的地才会发生重组，过程中的路由设备无能力重组。如果任何一个分片丢失，整个数据包就丢失了。</p>
+<h4 id="MTU-1500-数据报长度2992字节-分片重组示例"><a href="#MTU-1500-数据报长度2992字节-分片重组示例" class="headerlink" title="MTU=1500 数据报长度2992字节 分片重组示例"></a>MTU=1500 数据报长度2992字节 分片重组示例</h4><div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">IPv4 Header</th>
+<th style="text-align:center">UDP Header</th>
+<th style="text-align:center">UDP Data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">20</td>
+<td style="text-align:center">8</td>
+<td style="text-align:center">1472</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>FragmentOffset = 0 (第一个字节在原始IPv4数据中的偏移量 8字节为单位)<br>Flags = MF</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">IPv4</th>
+<th style="text-align:center">UDP Data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">20</td>
+<td style="text-align:center">1480</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>FragmentOffset = 185 (185*8=1480)<br>Flags = MF</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">IPv4</th>
+<th style="text-align:center">UDP Data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">20</td>
+<td style="text-align:center">40</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>FragmentOffset= 370 (370*8=2960)<br>Flags = DF</p>
+<h4 id="注意-包含源端口和目的端口只存在第一个分片-该行为对于Nat-防火墙的影响是复杂的"><a href="#注意-包含源端口和目的端口只存在第一个分片-该行为对于Nat-防火墙的影响是复杂的" class="headerlink" title="注意: 包含源端口和目的端口只存在第一个分片, 该行为对于Nat/防火墙的影响是复杂的"></a>注意: 包含源端口和目的端口只存在第一个分片, 该行为对于Nat/防火墙的影响是复杂的</h4><h2 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h2><p><img src="/images/tcp.png" alt="tcp"></p>
+<h5 id="tcp-wiki"><a href="#tcp-wiki" class="headerlink" title="tcp wiki"></a><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol">tcp wiki</a></h5><p>IPv4/UDP不包含传输数据机制，它们会用CRC函数检测有差错数据。但是它们不尝试去纠正差错。<br>事实上，通信媒介可能丢失或者改变被传递的消息。克劳德*香农在1984给出关于该课题最重要<br>的理论, 构成许多通信协议的基础，包括TCP。</p>
+<p>TCP提供一种面向连接、可靠的字节流服务。“面向连接”指使用TCP的两个应用程序必须在交换数据<br>前建立一条TCP连接。TCP提供一种字节流抽象概念给应用程序，结果导致TCP无消息边界。所以对于<br>字节流的解读交由应用程序处理。</p>
+<h3 id="可靠性的理解"><a href="#可靠性的理解" class="headerlink" title="可靠性的理解!!!"></a>可靠性的理解!!!</h3><p>1: 接收方是否已接受到分组？？？<br>接收方给发送方发信号以确定已经接受到一个分组。该种访法称为“确认”。<br>基本形式：<br>发送方： 发送分组，等待ACK<br>接收方： 收到分组, 发送ACK<br>2: 接收方接受到的分组是否与发送方发送的是同一个？？？<br>编码校验CRC<br>3: 提高吞吐量 分组窗口与滑动窗口。允许同时发送多个分组</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">…</th>
+<th style="text-align:center">…</th>
+<th style="text-align:center">3</th>
+<th style="text-align:center">4</th>
+<th style="text-align:center">5</th>
+<th style="text-align:center">6</th>
+<th style="text-align:center">7</th>
+<th style="text-align:center">…</th>
+<th style="text-align:center">…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center">已发送已确认</td>
+<td style="text-align:center">已发送未确认</td>
+<td style="text-align:center">已发送未确认</td>
+<td style="text-align:center">已发送未确认</td>
+<td style="text-align:center">未发送</td>
+<td style="text-align:center"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>4: ACK 丢失？？？<br>TCP拥有2套独立机制完成重传。基于时间和基于确认信息。TCP在发送数据会设置一个计时器，超时后会重传，称为超时重传(RTO)。<br>基于接收端反馈信息引发重传，即快速重传机制。</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">字段</th>
+<th style="text-align:center">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Checksum</td>
+<td style="text-align:center">TCP头部和数据</td>
+</tr>
+<tr>
+<td style="text-align:center">CWR</td>
+<td style="text-align:center">拥塞窗口减</td>
+</tr>
+<tr>
+<td style="text-align:center">ECE</td>
+<td style="text-align:center">ECN回显</td>
+</tr>
+<tr>
+<td style="text-align:center">URG</td>
+<td style="text-align:center">紧急</td>
+</tr>
+<tr>
+<td style="text-align:center">ACK</td>
+<td style="text-align:center">确认</td>
+</tr>
+<tr>
+<td style="text-align:center">PSH</td>
+<td style="text-align:center">推送</td>
+</tr>
+<tr>
+<td style="text-align:center">RST</td>
+<td style="text-align:center">重置</td>
+</tr>
+<tr>
+<td style="text-align:center">SYN</td>
+<td style="text-align:center">初始化</td>
+</tr>
+<tr>
+<td style="text-align:center">FIN</td>
+<td style="text-align:center">结束</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="TCP-State"><a href="#TCP-State" class="headerlink" title="TCP State"></a>TCP State</h3><p><img src="/images/tcp_state.svg" alt="tcp_state"></p>
+<p>TCP 状态转换图</p>
+<h3 id="TCP-Half-Close-发送方-发送FIN-等待ACK-接收方：接受FIN-发送ACK"><a href="#TCP-Half-Close-发送方-发送FIN-等待ACK-接收方：接受FIN-发送ACK" class="headerlink" title="TCP Half Close  发送方: 发送FIN, 等待ACK 接收方：接受FIN, 发送ACK"></a>TCP Half Close <img src="/images/tcp_half_close.png" alt="tcp_half_close"> 发送方: 发送FIN, 等待ACK 接收方：接受FIN, 发送ACK</h3><p>(此时发送方 处于半关闭)<br>接收方: 发送数据，等待ACK<br>发送方: 接受数据，发送ACK<br>……<br>……<br>接收方：发送FIN, 等待ACK<br>发送方：接受FIN, 发送ACK<br>接收方：关闭<br>发送方: 关闭</p>
+<h3 id="TCP-MSS"><a href="#TCP-MSS" class="headerlink" title="TCP MSS"></a>TCP MSS</h3><div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">长度</th>
+<th style="text-align:center">名称</th>
+<th style="text-align:center">描述与目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">EOL</td>
+<td style="text-align:center">结束</td>
+</tr>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">NOP</td>
+<td style="text-align:center">无操作 填充</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:center">MSS</td>
+<td style="text-align:center">最大段大小</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:center">WSOPT</td>
+<td style="text-align:center">窗口缩放因子</td>
+</tr>
+<tr>
+<td style="text-align:center">10</td>
+<td style="text-align:center">TSOPT</td>
+<td style="text-align:center">时间戳</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>建立一条TCP连接时，双方都要在SYN报文段的MSS选项说明允许的最大段大小。16Bit表明最大段大小65536。默认数值536字节。(536+20+20=576)组成一个IPv4数据报。</p>
+<h3 id="TCP-拥塞避免"><a href="#TCP-拥塞避免" class="headerlink" title="TCP 拥塞避免"></a>TCP 拥塞避免</h3><p><img src="/images/tcp_cwnd.jpg" alt="tcp_cwnd"></p>
+<p>TCP 连接建立后先经过 Slow Start 阶段，每收到一个 ACK，CWND 翻倍，数据发送率以指数形式增长，等出现丢包，或达到 ssthresh，或到达接收方 RWND 限制后进入 Congestion Avoidance 阶段</p>
+
+    </div>
+
+    
+        <hr class="fhr">
+        <div id="vcomments"></div>
+    
+</div>
+    <div class="footer" id="footer">
+    <p>Copyright © 2020 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink" target="_blank" rel="noopener" href="https://github.com/sanjinhub/hexo-theme-geek">Geek</a>.
+        <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label>
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="white">
+<input type="hidden" id="valine_appid" value="CmCti21ooOOIzFOhEyFkFvR0-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="FqiyUqbg7McKN2eG0MCewupf">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+</body>
+
+</html>
