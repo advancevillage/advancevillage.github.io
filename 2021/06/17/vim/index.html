@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>
+        Large World! Small Me!
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            Vim Go开发环境搭建
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h2 id="预准备条件"><a href="#预准备条件" class="headerlink" title="预准备条件"></a>预准备条件</h2><div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">依赖</th>
+<th style="text-align:center">版本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">make</td>
+<td style="text-align:center">3.81</td>
+</tr>
+<tr>
+<td style="text-align:center">vim</td>
+<td style="text-align:center">8.2</td>
+</tr>
+<tr>
+<td style="text-align:center">Python</td>
+<td style="text-align:center">3.9</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="安装Python-源码编译"><a href="#安装Python-源码编译" class="headerlink" title="安装Python 源码编译"></a>安装Python 源码编译</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">https://www.python.org/downloads/<span class="built_in">source</span>/</span><br><span class="line">tar -xvf Python-3.9.0.tar.xz</span><br><span class="line"><span class="built_in">cd</span> Python-3.9.0</span><br><span class="line">./configure --enable-framework</span><br><span class="line">make </span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+<h3 id="安装Vim-源码编译"><a href="#安装Vim-源码编译" class="headerlink" title="安装Vim 源码编译"></a>安装Vim 源码编译</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/vim/vim.git</span><br><span class="line"><span class="built_in">cd</span> vim</span><br><span class="line">./configure --enable-python3interp=yes</span><br><span class="line">make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+<h3 id="安装vim-插件"><a href="#安装vim-插件" class="headerlink" title="安装vim 插件"></a>安装vim 插件</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/advancevillage/vim.git</span><br><span class="line">mv vim ~/.vim</span><br><span class="line">:PluginInstall</span><br></pre></td></tr></table></figure>
+<h3 id="编译YCM"><a href="#编译YCM" class="headerlink" title="编译YCM"></a>编译YCM</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/.vim/plugged/YouCompleteMe</span><br><span class="line">python3 install.py  --go-completer</span><br></pre></td></tr></table></figure>
+<h3 id="自定义插件"><a href="#自定义插件" class="headerlink" title="自定义插件"></a>自定义插件</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">vim </span><br><span class="line"> |------<span class="built_in">autoload</span> (插件管理器plug.vim)</span><br><span class="line"> |		 	|------plug.vim</span><br><span class="line"> |</span><br><span class="line"> |------plugged  (插件目录)</span><br><span class="line"> |</span><br><span class="line"> |------after(此目录是插件vim-cpp-enhanced-highlight需要而创建的)</span><br><span class="line"> |		  	|------syntax</span><br><span class="line"> |			 			|------cpp.vim</span><br><span class="line"> |						|------c.vim</span><br><span class="line"> |</span><br><span class="line"> |------conf (配置vim的脚本文件夹)</span><br><span class="line"> |			|</span><br><span class="line"> |			|------basic.vim	(vim基本配置)</span><br><span class="line"> |			|</span><br><span class="line"> |			|------keymap.vim	(vim按键映射)</span><br><span class="line"> |			|</span><br><span class="line"> |			|------pluginmanager.vim  (加载插件和插件的配置文件)</span><br><span class="line"> |			|</span><br><span class="line"> |			|------pluginconf (插件的配置目录)</span><br><span class="line"> |</span><br><span class="line"> |------doc	(参考资料)</span><br><span class="line"> |			|------README.md</span><br><span class="line"> |</span><br><span class="line"> |------tags(标签文件目录)</span><br><span class="line"> |			|------cpptags</span><br><span class="line"> |			|</span><br><span class="line"> |			|------opencvtags</span><br></pre></td></tr></table></figure>
+<h6 id="vim-conf"><a href="#vim-conf" class="headerlink" title="vim conf"></a><a target="_blank" rel="noopener" href="https://github.com/advancevillage/vim">vim conf</a></h6><h3 id="VIM-语法"><a href="#VIM-语法" class="headerlink" title="VIM 语法"></a>VIM 语法</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">g(全局变量,可以在当前脚本和其他外部脚本中引用), </span><br><span class="line">s(局部变量,仅在当前脚本中起效)</span><br><span class="line"></span><br><span class="line">格式: execute  <span class="string">&#x27;:so&#x27;</span>  path/xxx.vim</span><br><span class="line">eg:</span><br><span class="line"><span class="built_in">let</span> g:vim_home=expand(<span class="string">&#x27;~/.vim&#x27;</span>)</span><br><span class="line">execute <span class="string">&#x27;:so&#x27;</span> g:vim_home.<span class="string">&quot;/conf/basic.vim&quot;</span></span><br></pre></td></tr></table></figure>
+<h3 id="VIM-加载过程"><a href="#VIM-加载过程" class="headerlink" title="VIM 加载过程"></a>VIM 加载过程</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">   设置一个全局变量,VIM自动加载vimrc文件。所以从vimrc设置使它自动加载其他vim脚本 </span><br><span class="line">定义一个全局变量,使VIM从当前目录下.vim加载配置文件</span><br><span class="line">    <span class="built_in">let</span> g:vim_home = expand(<span class="string">&#x27;~/.vim&#x27;</span>)</span><br><span class="line"></span><br><span class="line">   设置加载的VIM脚本 <span class="string">&#x27;.&#x27;</span>表示字符串连接符。先加载VIM基本配置脚本,basic.vim中定义 常规</span><br><span class="line">设置,例如显示行号, 编码设置,鼠标任意点击等</span><br><span class="line">    execute <span class="string">&#x27;:so&#x27;</span> g:vim_home.<span class="string">&quot;/conf/basic.vim&quot;</span></span><br><span class="line"></span><br><span class="line">加载快键键重映射,根据自己的习惯定义</span><br><span class="line">    execute <span class="string">&#x27;:so&#x27;</span> g:vim_home.<span class="string">&quot;/conf/keymap.vim&quot;</span></span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+        <hr class="fhr">
+        <div id="vcomments"></div>
+    
+</div>
+    <div class="footer" id="footer">
+    <p>Copyright © 2020 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink" target="_blank" rel="noopener" href="https://github.com/sanjinhub/hexo-theme-geek">Geek</a>.
+        <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label>
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="white">
+<input type="hidden" id="valine_appid" value="CmCti21ooOOIzFOhEyFkFvR0-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="FqiyUqbg7McKN2eG0MCewupf">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+</body>
+
+</html>
