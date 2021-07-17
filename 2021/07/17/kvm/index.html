@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>
+        Large World! Small Me!
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            虚拟化环境KVM
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h2 id="虚拟化支持检查"><a href="#虚拟化支持检查" class="headerlink" title="虚拟化支持检查"></a>虚拟化支持检查</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grep -Eoc &#x27;(vmx|svm)&#x27; /proc/cpuinfo</span><br></pre></td></tr></table></figure>
+<h2 id="安装软件包"><a href="#安装软件包" class="headerlink" title="安装软件包"></a>安装软件包</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils</span><br></pre></td></tr></table></figure>
+<ul>
+<li>qemu-kvm 硬件模拟的软件程序</li>
+<li>libvirt-daemon-system   系统服务运行的配置文件</li>
+<li>libvirt-clients 管理虚拟化工具</li>
+<li>bridge-utils 配置网络桥接的命令行工具</li>
+</ul>
+<h2 id="初体验"><a href="#初体验" class="headerlink" title="初体验"></a>初体验</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">virsh list --all</span><br><span class="line"></span><br><span class="line"> Id   Name          State</span><br><span class="line">------------------------------</span><br><span class="line"> 3    ubuntu20.04   running</span><br><span class="line"> -    freebsd12.0   shut off</span><br></pre></td></tr></table></figure>
+<h2 id="XML启动"><a href="#XML启动" class="headerlink" title="XML启动"></a>XML启动</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">// 创建网桥</span><br><span class="line">ip link add name br0 type bridge</span><br><span class="line">ip link set br0 up</span><br><span class="line"></span><br><span class="line">//创建镜像(qocw2) 动态</span><br><span class="line">qemu-img create -f qcow2 /tmp/ubuntu.qcow2 10G  </span><br><span class="line"></span><br><span class="line">//创建XML</span><br><span class="line">&lt;domain type=&#x27;kvm&#x27;&gt; </span><br><span class="line">    &lt;name&gt;virtual_machine_name&lt;/name&gt; </span><br><span class="line">    &lt;memory&gt;2048&lt;/memory&gt;</span><br><span class="line">    &lt;currentMemory&gt;1024&lt;/currentMemory&gt;</span><br><span class="line">    &lt;vcpu&gt;1&lt;/vcpu&gt; </span><br><span class="line">    &lt;os&gt; </span><br><span class="line">      &lt;type arch=&#x27;x86_64&#x27; machine=&#x27;pc&#x27;&gt;hvm&lt;/type&gt; </span><br><span class="line">      &lt;boot dev=&#x27;cdrom&#x27;/&gt;                                            </span><br><span class="line">   &lt;/os&gt; </span><br><span class="line">   &lt;features&gt; </span><br><span class="line">     &lt;acpi/&gt; </span><br><span class="line">     &lt;apic/&gt; </span><br><span class="line">     &lt;pae/&gt; </span><br><span class="line">   &lt;/features&gt; </span><br><span class="line">   &lt;clock offset=&#x27;localtime&#x27;/&gt; </span><br><span class="line">   &lt;on_poweroff&gt;destroy&lt;/on_poweroff&gt; </span><br><span class="line">   &lt;on_reboot&gt;restart&lt;/on_reboot&gt;   </span><br><span class="line">   &lt;on_crash&gt;destroy&lt;/on_crash&gt; </span><br><span class="line">   &lt;devices&gt; </span><br><span class="line">     &lt;emulator&gt;/usr/bin/qemu&lt;/emulator&gt; </span><br><span class="line">     &lt;disk type=&#x27;file&#x27; device=&#x27;disk&#x27;&gt; </span><br><span class="line">      &lt;driver name=&#x27;qemu&#x27; type=&#x27;qcow2&#x27;/&gt; </span><br><span class="line">      &lt;source file=&#x27;/tmp/ubuntu.qcow2&#x27;/&gt;</span><br><span class="line">       &lt;target dev=&#x27;hda&#x27; bus=&#x27;ide&#x27;/&gt; </span><br><span class="line">     &lt;/disk&gt; </span><br><span class="line">     &lt;disk type=&#x27;file&#x27; device=&#x27;cdrom&#x27;&gt; </span><br><span class="line">       &lt;source file=&#x27;/tmp/ubuntu-20.04.2.iso&#x27;/&gt; </span><br><span class="line">       &lt;target dev=&#x27;hdb&#x27; bus=&#x27;ide&#x27;/&gt; </span><br><span class="line">     &lt;/disk&gt; </span><br><span class="line">    &lt;interface type=&#x27;bridge&#x27;&gt; </span><br><span class="line">      &lt;source bridge=&#x27;br0&#x27;/&gt; </span><br><span class="line">      &lt;mac address=&quot;00:16:3e:5d:aa:a8&quot;/&gt;</span><br><span class="line">    &lt;/interface&gt; </span><br><span class="line">    &lt;input type=&#x27;mouse&#x27; bus=&#x27;ps2&#x27;/&gt; </span><br><span class="line">    &lt;graphics type=&#x27;vnc&#x27; port=&#x27;-1&#x27; autoport=&#x27;yes&#x27; listen = &#x27;0.0.0.0&#x27; keymap=&#x27;en-us&#x27;/&gt;</span><br><span class="line">   &lt;/devices&gt; </span><br><span class="line">&lt;/domain&gt; </span><br></pre></td></tr></table></figure>
+<h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">virsh define setup.xml</span><br><span class="line">virsh start  virtual_machine_name</span><br><span class="line"></span><br><span class="line">virsh destroy virtual_machine_name</span><br><span class="line">virsh undefine virtual_machine_name</span><br></pre></td></tr></table></figure>
+<h2 id="启动虚拟化守护进程"><a href="#启动虚拟化守护进程" class="headerlink" title="启动虚拟化守护进程"></a>启动虚拟化守护进程</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">systemctl status libvirtd</span><br><span class="line"></span><br><span class="line">systemctl start libvirtd</span><br></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://phoenixnap.com/kb/ubuntu-install-kvm">ubuntu install kvm</a></p>
+
+    </div>
+
+    
+        <hr class="fhr">
+        <div id="vcomments"></div>
+    
+</div>
+    <div class="footer" id="footer">
+    <p>Copyright © 2020 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink" target="_blank" rel="noopener" href="https://github.com/sanjinhub/hexo-theme-geek">Geek</a>.
+        <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label>
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="white">
+<input type="hidden" id="valine_appid" value="CmCti21ooOOIzFOhEyFkFvR0-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="FqiyUqbg7McKN2eG0MCewupf">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+</body>
+
+</html>
