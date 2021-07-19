@@ -21,76 +21,30 @@
 
 
 <body id="bodyx">
-    <div class="hd logodiv">
-    <img src="/img/logo.gif" class="logopng">
-    <p class="logot">dBoy</p>
-</div>
-<div class="hd">
-    <ol class="breadcrumb">
-        
-            <li><a class="ba" href="/project">作品</a></li>
-        
-            <li><a class="ba" href="/links">友联</a></li>
-        
-            <li><a class="ba" href="/about">关于</a></li>
-        
-            <li><a class="ba" target="_blank" rel="noopener" href="https://github.com/advancevillage">GIT</a></li>
-        
-    </ol>
-    <hr class="breadcrumbhr">
-</div>
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            分布式系统共识
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <p>分布式系统的特点之一容错，允许部分节点故障。衍生出分布式系统需要具备数据矫正的能力，比如节点故障后恢复。<br><u><b>那么一个基本的问题就是如何确定数据的正确性</b></u> 所以一个基本的思想就是半数以上都<u><b>一致</b></u>的,那么该值就是正确的。同时需要少数服从多数。</p>
+<ul>
+<li>半数以上原则</li>
+<li>少数服从多数原则</li>
+</ul>
+<h2 id="etcd-amp-amp-raft"><a href="#etcd-amp-amp-raft" class="headerlink" title="etcd &amp;&amp; raft"></a>etcd &amp;&amp; raft</h2><p><a target="_blank" rel="noopener" href="https://raft.github.io/raft.pdf">Raft 论文</a><br><a target="_blank" rel="noopener" href="http://thesecretlivesofdata.com/raft/">Raft 动画</a></p>
+<h2 id="zookeeper-amp-amp-zab"><a href="#zookeeper-amp-amp-zab" class="headerlink" title="zookeeper &amp;&amp; zab"></a>zookeeper &amp;&amp; zab</h2><p><a target="_blank" rel="noopener" href="https://www.usenix.org/legacy/event/atc10/tech/full_papers/Hunt.pdf">Zookeeper 论文</a></p>
+<h2 id="paxos"><a href="#paxos" class="headerlink" title="paxos"></a>paxos</h2>
+    </div>
 
-<div class="hd">
     
-    
-        
-        
-            <div class="titlex">
-                <p><span class="jing">#</span>
-                    2021
-                </p>
-            </div>
-            
-        
-        <a class="flink" href="/2021/07/18/consensus/">
-            <div class="list">
-                <div class="postname">
-                    分布式系统共识
-                </div>
-                <div class="posttime">
-                    July 18th
-                </div>
-            </div>
-        </a>
-    
-        
-        
-        <a class="flink" href="/2021/07/17/kvm/">
-            <div class="list">
-                <div class="postname">
-                    虚拟化环境KVM
-                </div>
-                <div class="posttime">
-                    July 17th
-                </div>
-            </div>
-        </a>
-    
-        
-        
-        <a class="flink" href="/2021/07/16/of_port_mask/">
-            <div class="list">
-                <div class="postname">
-                    OVS tp_dst=port/mask
-                </div>
-                <div class="posttime">
-                    July 16th
-                </div>
-            </div>
-        </a>
+        <hr class="fhr">
+        <div id="vcomments"></div>
     
 </div>
-
     <div class="footer" id="footer">
     <p>Copyright © 2020 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink" target="_blank" rel="noopener" href="https://github.com/sanjinhub/hexo-theme-geek">Geek</a>.
         <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
