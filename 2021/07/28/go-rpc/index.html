@@ -41,8 +41,8 @@
 <h2 id="客户端封装-隐藏细节"><a href="#客户端封装-隐藏细节" class="headerlink" title="客户端封装 隐藏细节"></a>客户端封装 隐藏细节</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> serviceClient <span class="keyword">struct</span> &#123;</span><br><span class="line">	*rpc.Client</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//1. 创建IServer, 无内存分配， 赋值报错</span></span><br><span class="line"><span class="comment">//2. 判断serviceClient是否实现IServer接口 提供编译安全保障</span></span><br><span class="line"><span class="keyword">var</span> _ IServer = (*serviceClient)(<span class="literal">nil</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//1. 防止犯低级错误(名称/拼写...) </span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *serviceClient)</span> <span class="title">Method</span><span class="params">(request <span class="keyword">string</span>, reply *<span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> c.Client.Call(ServiceName+<span class="string">&quot;.Method&quot;</span>, request, reply)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">DialService</span><span class="params">(network, address <span class="keyword">string</span>)</span> <span class="params">(*serviceClient, error)</span></span> &#123;</span><br><span class="line">	c, err := rpc.Dial(network, address)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &amp;serviceClient&#123;Client: c&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="调用"><a href="#调用" class="headerlink" title="调用"></a>调用</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">c, err := DialService(<span class="string">&quot;tcp&quot;</span>, <span class="string">&quot;:13147&quot;</span>)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">	log.Fatal(err)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> reply <span class="keyword">string</span></span><br><span class="line">err = c.Method(<span class="string">&quot;method&quot;</span>, &amp;reply)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">	log.Fatal(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="补充细节"><a href="#补充细节" class="headerlink" title="补充细节"></a>补充细节</h2><ul>
-<li>连接断开重连</li>
-<li>集群模式连接轮询</li>
+<li>连接断开重连 [goroute ping-pong 机制处理]</li>
+<li>集群模式连接轮询 [连接时与集群所有节点建立连接 随机选择连接]</li>
 <li>基础监控</li>
 </ul>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://chai2010.cn/advanced-go-programming-book/ch4-rpc/ch4-01-rpc-intro.html">RPC入门</a></p>
@@ -102,22 +102,6 @@
     color: #669bfc;
 }
 </style>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        tex2jax: {
-            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
-            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
-            processEscapes: true
-        }
-    });
-    MathJax.Hub.Queue(function() {
-        var all = MathJax.Hub.getAllJax();
-        for (var i = 0; i < all.length; ++i)
-            all[i].SourceElement().parentNode.className += ' has-jax';
-    });
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
-
 </body>
 
 </html>
