@@ -44,7 +44,12 @@
 <h2 id="启动虚拟化守护进程"><a href="#启动虚拟化守护进程" class="headerlink" title="启动虚拟化守护进程"></a>启动虚拟化守护进程</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">systemctl status libvirtd</span><br><span class="line"></span><br><span class="line">systemctl start libvirtd</span><br></pre></td></tr></table></figure>
 <h2 id="镜像下载"><a href="#镜像下载" class="headerlink" title="镜像下载"></a>镜像下载</h2><ul>
 <li><a target="_blank" rel="noopener" href="http://archive.ubuntu.com/ubuntu/dists/bionic/main/installer-amd64/current/images/netboot/mini.iso">ubuntu 18.04 mini 64MB</a></li>
-<li><a target="_blank" rel="noopener" href="http://tinycorelinux.net/12.x/x86/release/Core-12.0.iso">tinycore linux 11MB</a></li>
+<li><a target="_blank" rel="noopener" href="http://tinycorelinux.net/12.x/x86/release/Core-12.0.iso">tinycore linux 11MB</a><ul>
+<li>tce-load -wi openssh</li>
+<li>tce-load -wi iproute2</li>
+<li>tce-load -wi vim</li>
+</ul>
+</li>
 </ul>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://phoenixnap.com/kb/ubuntu-install-kvm">ubuntu install kvm</a></p>
 
