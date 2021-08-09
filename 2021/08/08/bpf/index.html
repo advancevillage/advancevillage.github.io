@@ -21,74 +21,33 @@
 
 
 <body id="bodyx">
-    <div class="hd logodiv">
-    <img src="/img/cover.jpeg" width="100%">
-    <p class="logot">dBoy</p>
-</div>
-<div class="hd">
-    <ol class="breadcrumb">
-        
-            <li><a class="ba" href="/project">作品</a></li>
-        
-            <li><a class="ba" href="/links">友联</a></li>
-        
-            <li><a class="ba" href="/about">关于</a></li>
-        
-            <li><a class="ba" target="_blank" rel="noopener" href="https://github.com/advancevillage">GIT</a></li>
-        
-    </ol>
-    <hr class="breadcrumbhr">
-</div>
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            BPF
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><p>eBPF(extended BPF)支持<b>用户态将C语言编写内核中运行。</b>c bpf program<sup>   llvm</sup>BPF指令集的ELF文件<sup>  bpf_load_program</sup>内核检查<sup>   check_cfg/do_check</sup></p>
+<ul>
+<li>bpf_load_program is the bpf() system call<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2></li>
+<li>内核源码编译 ?? /usr/src/<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">make scripts</span><br><span class="line">make defconfig  //.config</span><br><span class="line">make headers_install</span><br><span class="line">make M=samples/bpf</span><br></pre></td></tr></table></figure></li>
+<li>安装依赖<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">apt install libncurses5-dev flex bison libelf-dev binutils-dev libssl-dev</span><br><span class="line">apt install clang</span><br><span class="line">apt install llvm</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h1 id="未完-待续…"><a href="#未完-待续…" class="headerlink" title="未完 待续…"></a>未完 待续…</h1><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://lwn.net/Articles/740157/">A thorough introduction to eBPF</a></li>
+<li><a target="_blank" rel="noopener" href="https://qmonnet.github.io/whirl-offload/2016/09/01/dive-into-bpf/">a list of reading material</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_34258344/article/details/108932912">BPF 环境</a></li>
+<li><a target="_blank" rel="noopener" href="http://arthurchiao.art/blog/bcc-ebpf-tutorial-zh/">bcc/ebpf 安装及示例</a></li>
+<li><a target="_blank" rel="noopener" href="https://davidlovezoe.club/wordpress/archives/1122">Linux BPF</a></li>
+</ul>
 
-<div class="hd">
-    
-    
-        
-        
-            <div class="titlex">
-                <p><span class="jing">#</span>
-                    2021
-                </p>
-            </div>
-            
-        
-        <a class="flink" href="/2021/08/08/bpf/">
-            <div class="list">
-                <div class="postname">
-                    BPF
-                </div>
-                <div class="posttime">
-                    August 8th
-                </div>
-            </div>
-        </a>
-    
-        
-        
-        <a class="flink" href="/2021/08/04/ovs/">
-            <div class="list">
-                <div class="postname">
-                    OpenVSwitch
-                </div>
-                <div class="posttime">
-                    August 4th
-                </div>
-            </div>
-        </a>
-    
-        
-        
-        <a class="flink" href="/2021/07/17/kvm/">
-            <div class="list">
-                <div class="postname">
-                    虚拟化环境KVM
-                </div>
-                <div class="posttime">
-                    July 17th
-                </div>
-            </div>
-        </a>
-    
+    </div>
+
+     
 </div>
 
     <div class="footer" id="footer">
