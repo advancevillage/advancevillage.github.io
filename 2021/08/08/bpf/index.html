@@ -32,9 +32,27 @@
     <div class="post-content">
         <h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><p>eBPF(extended BPF)支持<b>用户态将C语言编写内核中运行。</b>c bpf program<sup>   llvm</sup>BPF指令集的ELF文件<sup>  bpf_load_program</sup>内核检查<sup>   check_cfg/do_check</sup></p>
 <ul>
-<li>bpf_load_program is the bpf() system call<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2></li>
-<li>内核源码编译 ?? /usr/src/<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">make scripts</span><br><span class="line">make defconfig  //.config</span><br><span class="line">make headers_install</span><br><span class="line">make M=samples/bpf</span><br></pre></td></tr></table></figure></li>
-<li>安装依赖<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">apt install libncurses5-dev flex bison libelf-dev binutils-dev libssl-dev</span><br><span class="line">apt install clang</span><br><span class="line">apt install llvm</span><br></pre></td></tr></table></figure>
+<li>bpf_load_program is the bpf() system call</li>
+</ul>
+<h2 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">apt install libncurses5-dev flex bison libelf-dev binutils-dev libssl-dev</span><br><span class="line">apt install clang</span><br><span class="line">apt install llvm</span><br></pre></td></tr></table></figure>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><ul>
+<li>内核下载 /usr/src/<ul>
+<li><a target="_blank" rel="noopener" href="http://cdn.kernel.org/pub/linux/kernel/v4.x/">4.x</a></li>
+<li><a target="_blank" rel="noopener" href="http://cdn.kernel.org/pub/linux/kernel/v5.x/">5.x</a></li>
+<li><blockquote>
+<p>= 4.16.9 </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1: make defconfig  //.config</span><br><span class="line">2: make prepare</span><br><span class="line">3: make scripts</span><br><span class="line">4: make headers_install</span><br><span class="line">5: make M=samples/bpf V=1</span><br></pre></td></tr></table></figure>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="bpf-C-编程"><a href="#bpf-C-编程" class="headerlink" title="bpf C 编程"></a>bpf C 编程</h2><ul>
+<li>xxxx_kern.c</li>
+<li>xxxx_user.c</li>
+<li>示例<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//hello_kern.c</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;uapi/linux/bpf.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;bpf_helpers.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">SEC(<span class="string">&quot;tracepoint/syscalls/sys_enter_execve&quot;</span>)</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">trace_enter_execve</span><span class="params">(<span class="keyword">void</span> *ctx)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">char</span> msg[] = <span class="string">&quot;Hello BPF!\n&quot;</span>;</span><br><span class="line">	bpf_trace_printk(msg, <span class="keyword">sizeof</span>(msg));</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">char</span> _license[] SEC(<span class="string">&quot;license&quot;</span>) = <span class="string">&quot;GPL&quot;</span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//hello_user.c</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;bpf_load.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(load_bpf_file(<span class="string">&quot;hello_kern.o&quot;</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">	 	<span class="built_in">printf</span>(<span class="string">&quot;The kernel didn&#x27;t load BPF program\n&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	read_trace_pipe();</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>修改修改编译文件 samples/bpf/Makefile (4处位置)<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// +45 line</span><br><span class="line">hostprogs-y += hello</span><br><span class="line">// +96 line</span><br><span class="line">hello-objs := bpf_load.o $(LIBBPF) hello_user.o</span><br><span class="line">// +149 line</span><br><span class="line">always += hello_kern.o</span><br><span class="line">// +194 line</span><br><span class="line">HOSTLOADLIBES_hello += -lelf</span><br><span class="line"></span><br><span class="line">make M=samples/bpf V=1</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 <h1 id="未完-待续…"><a href="#未完-待续…" class="headerlink" title="未完 待续…"></a>未完 待续…</h1><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
@@ -100,22 +118,6 @@
     color: #669bfc;
 }
 </style>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        tex2jax: {
-            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
-            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
-            processEscapes: true
-        }
-    });
-    MathJax.Hub.Queue(function() {
-        var all = MathJax.Hub.getAllJax();
-        for (var i = 0; i < all.length; ++i)
-            all[i].SourceElement().parentNode.className += ' has-jax';
-    });
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
-
 </body>
 
 </html>
