@@ -57,24 +57,31 @@
 </ul>
 <h2 id="加载XDP-HOOK"><a href="#加载XDP-HOOK" class="headerlink" title="加载XDP HOOK"></a>加载XDP HOOK</h2><ul>
 <li>iproute2加载BPF程序到内核，因为iproute2包含加载BPF ELF加载器.<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip link set dev eth0 xdpgeneric obj xdp_pass_kern.o sec xdp </span><br></pre></td></tr></table></figure></li>
-<li>libbpf(xdp_pass_user.c 负责将clang-llvm生成的字节码加在内核并绑定到设备上)<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/libbpf/libbpf">libbpf</a>(xdp_pass_user.c 负责将clang-llvm生成的字节码加在内核并绑定到设备上)<ul>
 <li>代码:  git clone <a target="_blank" rel="noopener" href="https://github.com/libbpf/libbpf.git">https://github.com/libbpf/libbpf.git</a> | git checkout v0.4.0</li>
 <li>依赖:  libelf zlib <ul>
 <li>apt install -y libelf1 libelf-dev </li>
 <li>apt install -y zlib1g zlib1g-dev</li>
 </ul>
 </li>
-<li>头文件依赖软链设置<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/include</span><br><span class="line">ls -lh x86_64-linux-gnu/</span><br><span class="line"></span><br><span class="line">sudo ln -sf x86_64-linux-gnu/asm  asm</span><br><span class="line">sudo ln -sf x86_64-linux-gnu/bits bits</span><br><span class="line">sudo ln -sf x86_64-linux-gnu/gun  gnu</span><br><span class="line">sudo ln -sf x86_64-linux-gnu/sys  sys</span><br></pre></td></tr></table></figure>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bpf_prog_load</span><br><span class="line">bpf_set_link_xdp_fd</span><br></pre></td></tr></table></figure>
-<h4 id="eBPF-amp-XDP-实验用例"><a href="#eBPF-amp-XDP-实验用例" class="headerlink" title="eBPF &amp; XDP 实验用例"></a><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1808426">eBPF &amp; XDP 实验用例</a></h4></li>
+<li>头文件依赖软链设置<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/include</span><br><span class="line">ls -lh x86_64-linux-gnu/</span><br><span class="line"></span><br><span class="line">sudo ln -sf x86_64-linux-gnu/asm  asm</span><br><span class="line">sudo ln -sf x86_64-linux-gnu/bits bits</span><br><span class="line">sudo ln -sf x86_64-linux-gnu/gun  gnu</span><br><span class="line">sudo ln -sf x86_64-linux-gnu/sys  sys</span><br></pre></td></tr></table></figure></li>
+<li>依赖内核构建<a target="_blank" rel="noopener" href="https://www.kernel.org/doc/html/latest/bpf/btf.html">BTF</a><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ls -lh /sys/kernel/btf/vmlinux</span><br></pre></td></tr></table></figure></li>
+<li>推荐系统<ul>
+<li><a target="_blank" rel="noopener" href="https://dl-cdn.alpinelinux.org/alpine/">Alpine 3.14</a><h4 id="eBPF-amp-XDP-实验用例"><a href="#eBPF-amp-XDP-实验用例" class="headerlink" title="eBPF &amp; XDP 实验用例"></a><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1808426">eBPF &amp; XDP 实验用例</a></h4></li>
 </ul>
 </li>
+</ul>
+</li>
+</ul>
+<h4 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h4><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/cilium/cilium/issues/368">fatal error: ‘gnu/stubs-32.h’</a></li>
+</ul>
+<h2 id="防火墙"><a href="#防火墙" class="headerlink" title="防火墙"></a>防火墙</h2><h2 id="NAT"><a href="#NAT" class="headerlink" title="NAT"></a>NAT</h2><ul>
+<li><a target="_blank" rel="noopener" href="http://arthurchiao.art/blog/conntrack-design-and-implementation/">CT</a></li>
 </ul>
 <h1 id="未完-待续…"><a href="#未完-待续…" class="headerlink" title="未完 待续…"></a>未完 待续…</h1><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
 <li><a target="_blank" rel="noopener" href="https://lwn.net/Articles/740157/">A thorough introduction to eBPF</a></li>
 <li><a target="_blank" rel="noopener" href="https://qmonnet.github.io/whirl-offload/2016/09/01/dive-into-bpf/">a list of reading material</a></li>
-<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_34258344/article/details/108932912">BPF 环境</a></li>
-<li><a target="_blank" rel="noopener" href="http://arthurchiao.art/blog/bcc-ebpf-tutorial-zh/">bcc/ebpf 安装及示例</a></li>
 <li><a target="_blank" rel="noopener" href="https://davidlovezoe.club/wordpress/archives/1122">Linux BPF</a></li>
 </ul>
 
