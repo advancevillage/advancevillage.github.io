@@ -1,0 +1,279 @@
+#!/bin/bash
+
+#options
+PREFIX=
+BUILD="build"
+
+opt=
+help=no
+
+for option
+do 
+    opt="$opt `echo $option | sed -e \"s/\(--[^=]*=\)\(.* .*\)/\1'\2'/\"`"
+
+    case "$option" in
+        -*=*) value=`echo "$option" | sed -e 's/[-_a-zA-Z0-9]*=//'` ;;
+        *) value="" ;;
+    esac
+
+    case "$option" in 
+        --help)     help=yes        ;;
+        --prefix=*) PREFIX="$value" ;;
+        --build=*)  BUILD="$value"  ;;
+    esac
+done
+
+if [ $help = yes ]; then 
+
+cat <<EOF 
+
+   --help                             print this message 
+   --prefix=PATH                      set installation prefix
+   --build=DIR                        set build directory
+
+EOF
+    exit 1
+fi
+
+MAKEFILE=$BUILD/Makefile
+
+VMLINUX="/sys/kernel/btf/vmlinux"
+BPFTOOL=`which bpftool`
+
+CC=`which clang`
+LLVM=`which llc`
+
+# check the echo's "-n" option and "\c" capability
+if echo "test\c" | grep c >/dev/null; then
+    if echo -n test | grep n >/dev/null; then
+        echo_n=
+        echo_c=
+    else 
+        echo_n=-n
+        echo_c=
+    fi
+else 
+    echo_n=
+    echo_c='\c'
+fi
+
+# 创建根Makefile
+mkdir -p $BUILD
+placeholder="__TAB__"
+cat <<EOF | sed -e "s/$placeholder/\t/g" > Makefile 
+
+Q   := @
+
+define print_info
+${placeholder}\$(Q)printf ' %8s  %8s\n' \$(1) \$(2)
+endef
+
+$BUILD: 
+${placeholder}\$(call print_info,MKDIR,\$@)
+${placeholder}\$(Q)mkdir -p $BUILD
+${placeholder}\$(call print_info,MAKE,\$@)
+${placeholder}\$(Q)make -f $BUILD/Makefile
+
+.PHONY: all
+all: $BUILD
+    
+clean:
+${placeholder}\$(call print_info,CLEAN)
+${placeholder}\$(Q)rm -rf Makefile $BUILD
+EOF
+
+function print_error() {
+    msg=$1 
+    echo 
+    echo echo $0: error: $msg is not found
+    echo
+    exit 1
+}
+
+function print_info() {
+    hdr=$1
+    msg=$2
+    if [ "$msg" != "" ]; then 
+        echo "$hdr"
+        echo "$msg yes"
+    else 
+        echo $echo_n "$hdr yes"
+        echo
+    fi
+}
+
+#依赖检测
+# kernel  check >= 5.10
+feature="OS"
+if `uname -a >/dev/null 2>&1`; then
+    SYSTEM=`uname -s 2>/dev/null`
+    RELEASE=`uname -r 2>/dev/null`
+    MACHINE=`uname -m 2>/dev/null`
+    print_info "checking for $feature" " + $SYSTEM $RELEASE $MACHINE"
+else 
+    print_error $feature
+fi
+# vmlinux check
+feature="vmlinux"
+if test -f $VMLINUX; then
+    print_info "checking for $feature" " + using $VMLINUX"
+else 
+    print_error $feature
+fi
+# clang   check  >= 11
+feature="Clang compiler"
+if `$CC -v 2>&1 | grep 'clang version' >/dev/null 2>&1`; then
+    v=`$CC -v 2>&1 | grep 'clang version' | awk '{print $4}'`
+    print_info "checking for $feature" " + using $feature $v"
+else 
+    print_error $feature
+fi
+# llvm    check  >= 11
+feature="LLVM"
+if `$LLVM --version 2>&1 |grep 'LLVM version' >/dev/null 2>&1`; then 
+    v=`$LLVM --version 2>&1 |grep 'LLVM version' | awk '{print $3}'`
+    LLVM_STRIP=`which llvm-strip`
+    print_info "checking for $feature" " + using $feature $v"
+else 
+    print_error $feature
+fi
+# bpftool check 
+feature="btftool"
+if `$BPFTOOL --version 2>&1 |grep 'bpftool' >/dev/null 2>&1`; then 
+    v=`$BPFTOOL --version 2>&1 |grep 'bpftool' | awk '{print $2}'`
+    print_info "checking for $feature" " + using $feature $v"
+else 
+    print_error $feature
+fi
+# elf     check
+# https://code.woboq.org/linux/linux/tools/build/feature/
+feature="elf"
+cat <<EOF > $BUILD/$feature.c 
+#include <libelf.h>
+int main(void) {
+    Elf *elf = elf_begin(0, ELF_C_READ, 0);
+    return (long)elf;
+}
+EOF
+if `$CC -o $BUILD/$feature $BUILD/$feature.c -lelf > /dev/null 2>&1`; then 
+    rm -f $BUILD/$feature $BUILD/$feature.c
+    print_info "checking share library for $feature"
+else 
+    print_error $feature 
+fi
+# zlib    check
+feature="zlib"
+cat <<EOF > $BUILD/$feature.c 
+#include <zlib.h>
+int main(void) {
+    z_stream zs;
+    inflateInit(&zs);
+    return 0;
+}
+EOF
+if `$CC -o $BUILD/$feature $BUILD/$feature.c -lz > /dev/null 2>&1`; then 
+    rm -f $BUILD/$feature $BUILD/$feature.c
+    print_info "checking share library for $feature"
+else 
+    print_error $feature 
+fi
+# libbpf  check
+feature="bpf"
+cat <<EOF > $BUILD/$feature.c
+#include <linux/bpf.h>
+#include <bpf/bpf_helpers.h>
+#include <bpf/bpf_endian.h>
+
+int test_bpf(void *data_begin, void *data_end) {
+    return bpf_htons(1);
+}
+
+SEC("xdp_test")
+int xdp_secure_policy(struct xdp_md *ctx) {
+    void *data = (void *)(__u64)ctx->data;
+    void *data_end = (void *)(__u64)ctx->data_end;
+    if (test_bpf(data, data_end)){
+        return XDP_PASS;
+    } else {
+        return XDP_DROP;
+    }
+}
+char __license[] SEC("license") = "GPL";
+EOF
+if `$CC -o $BUILD/$feature.o -g -O2 -target bpf -D__TARGET_ARCH_$(echo $MACHINE | sed 's/x86_64/x86/') -c $BUILD/$feature.c > /dev/null 2>&1`; then 
+    print_info "checking share library for $feature"
+    if `$LLVM_STRIP -g $BUILD/$feature.o > /dev/null 2>&1`; then 
+        print_info "checking llvm_strip"
+        if `$BPFTOOL gen skeleton $BUILD/$feature.o > /dev/null 2>&1`; then
+            print_info "checking bpftool gen skeleton"
+            rm -f $BUILD/$feature.o $BUILD/$feature.c
+        else 
+            print_error "bpftool gen skeleton"
+        fi
+    else 
+        print_error "llvm_strip"
+    fi
+else 
+    print_error $feature 
+fi
+
+#生成项目Makefile
+SRC="`pwd`/src"
+cat <<EOF | sed -e "s/$placeholder/\t/g" > $MAKEFILE 
+
+Q           := @
+CLANG       := $CC
+LLVM_STRIP  := $LLVM_STRIP
+ARCH        := $(echo $MACHINE | sed 's/x86_64/x86/')
+BPFTOOL     := $BPFTOOL
+BUILD       := $BUILD
+
+CFLAGS      := -g -Wall 
+BPFCFLAGS   := \$(CFLAGS) -target bpf -D__TARGET_ARCH_\$(ARCH)
+INCLUDES    := -I\$(BUILD)
+LIBS        := -lelf -lz -lbpf 
+SRC         := $SRC
+
+define print_info
+${placeholder}\$(Q)printf ' %8s  %8s\n' \$(1) \$(2)
+endef
+
+c           := \$(foreach v,\$(shell ls \$(SRC)/*.c),\$(shell basename \$(v)))
+h           := \$(foreach v,\$(shell ls \$(SRC)/*.h),\$(shell basename \$(v)))
+o           := \$(patsubst %.h,%.o,\$(h))
+
+.PHONY: all
+all: \$(patsubst %.o,\$(BUILD)/%,\$(o))
+
+\$(patsubst %.o,\$(BUILD)/%.bpf.c,\$(o)):
+${placeholder}\$(Q)\$(call print_info,Copy,\$@) 
+${placeholder}\$(Q)cp -f \$(SRC)/\$(shell basename \$@) \$(BUILD)/\$(shell basename \$@)
+
+\$(patsubst %.o,\$(BUILD)/%.c,\$(o)):
+${placeholder}\$(Q)\$(call print_info,Copy,\$@) 
+${placeholder}\$(Q)cp -f \$(SRC)/\$(shell basename \$@) \$(BUILD)/\$(shell basename \$@)
+
+\$(patsubst %.o,\$(BUILD)/%.h,\$(o)):
+${placeholder}\$(Q)\$(call print_info,Copy,\$@) 
+${placeholder}\$(Q)cp -f \$(SRC)/\$(shell basename \$@) \$(BUILD)/\$(shell basename \$@)
+
+\$(patsubst %.o,\$(BUILD)/%.bpf.o,\$(o)): %.bpf.o : %.bpf.c %.h
+${placeholder}\$(Q)\$(call print_info,Compile,\$@) 
+${placeholder}\$(Q)\$(CLANG) \$(BPFCFLAGS) \$(INCLUDES) -c \$< -o \$@ 
+${placeholder}\$(Q)\$(LLVM_STRIP) -g \$@
+
+\$(patsubst %.o,\$(BUILD)/%.skel.h,\$(o)): %.skel.h : %.bpf.o
+${placeholder}\$(Q)\$(call print_info,Generate,\$@) 
+${placeholder}\$(Q)\$(BPFTOOL) gen skeleton \$< > \$@
+
+\$(patsubst %.o,\$(BUILD)/%.o,\$(o)): %.o : %.c %.h %.skel.h
+${placeholder}\$(Q)\$(call print_info,Compile,\$@) 
+${placeholder}\$(Q)\$(CLANG) \$(CFLAGS) \$(INCLUDES) -c \$< -o \$@  
+
+\$(patsubst %.o,\$(BUILD)/%,\$(o)): % : %.o
+${placeholder}\$(Q)\$(call print_info,Compile,\$@) 
+${placeholder}\$(Q)\$(CLANG) \$(CFLAGS) \$(LIBS) \$< -o \$@
+
+.SECONDARY:
+EOF
+

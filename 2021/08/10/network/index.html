@@ -30,7 +30,7 @@
         <hr>
     </div>
     <div class="post-content">
-        <h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -i net2 -ennn -tttt -c 10 &#x27;ip[9:1]=47 and (ip[54:4]=0x6A4BDC03 or ip[58:4]=0x6A4BDC03)&#x27;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+        <h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -i net2 -ennn -tttt -c 10 &#x27;ip[9:1]=47 and (ip[54:4]=0x6A4BDC03 or ip[58:4]=0x6A4BDC03)&#x27;</span><br><span class="line"></span><br><span class="line">匹配源或目的端口</span><br><span class="line">tcpdump -i ens3 -c 10 -ennn -tttt &#x27;port 12160&#x27;</span><br></pre></td></tr></table></figure>
 
     </div>
 
