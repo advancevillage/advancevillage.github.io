@@ -70,9 +70,9 @@ endef
 
 $BUILD: 
 ${placeholder}\$(call print_info,MKDIR,\$@)
-${placeholder}\$(Q)mkdir -p $BUILD
+${placeholder}\$(Q)mkdir -p \$@
 ${placeholder}\$(call print_info,MAKE,\$@)
-${placeholder}\$(Q)make -f $BUILD/Makefile
+${placeholder}\$(Q)make -C \$@
 
 .PHONY: all
 all: $BUILD
@@ -226,9 +226,9 @@ CLANG       := $CC
 LLVM_STRIP  := $LLVM_STRIP
 ARCH        := $(echo $MACHINE | sed 's/x86_64/x86/')
 BPFTOOL     := $BPFTOOL
-BUILD       := $BUILD
+BUILD       := .
 
-CFLAGS      := -g -Wall 
+CFLAGS      := -g -Wall -O2
 BPFCFLAGS   := \$(CFLAGS) -target bpf -D__TARGET_ARCH_\$(ARCH)
 INCLUDES    := -I\$(BUILD)
 LIBS        := -lelf -lz -lbpf 
