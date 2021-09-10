@@ -65,7 +65,7 @@
 </ul>
 </li>
 <li>头文件依赖软链设置<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/include</span><br><span class="line">ls -lh x86_64-linux-gnu/</span><br><span class="line"></span><br><span class="line">sudo ln -sf x86_64-linux-gnu/asm  asm</span><br><span class="line">sudo ln -sf x86_64-linux-gnu/bits bits</span><br><span class="line">sudo ln -sf x86_64-linux-gnu/gun  gnu</span><br><span class="line">sudo ln -sf x86_64-linux-gnu/sys  sys</span><br></pre></td></tr></table></figure></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/libbpf/libbpf-bootstrap/blob/master/tools/bpftool">BpfTool</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/libbpf/libbpf-bootstrap/raw/master/tools/bpftool">BpfTool</a></li>
 <li><b>依赖内核构建</b><a target="_blank" rel="noopener" href="https://www.kernel.org/doc/html/latest/bpf/btf.html">BTF</a><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ls -lh /sys/kernel/btf/vmlinux</span><br><span class="line"></span><br><span class="line">bpftool btf dump file /sys/kernel/btf/vmlinux format c &gt; /usr/include/linux/vmlinux.h</span><br></pre></td></tr></table></figure></li>
 <li>推荐系统<ul>
 <li><a target="_blank" rel="noopener" href="https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-11.0.0-amd64-netinst.iso">Debian 11</a></li>
@@ -201,6 +201,22 @@
     color: #669bfc;
 }
 </style>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
 </body>
 
 </html>
