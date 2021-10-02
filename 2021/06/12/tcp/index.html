@@ -25,7 +25,7 @@
     <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
     <div class="post-title">
         <p>
-            TCP/IP Part1
+            TCP/IP
         </p>
         <hr>
     </div>
@@ -693,6 +693,7 @@
 <p>建立一条TCP连接时，双方都要在SYN报文段的MSS选项说明允许的最大段大小。16Bit表明最大段大小65536。默认数值536字节。(536+20+20=576)组成一个IPv4数据报。</p>
 <h3 id="TCP-拥塞避免"><a href="#TCP-拥塞避免" class="headerlink" title="TCP 拥塞避免"></a>TCP 拥塞避免</h3><p><img src="/images/tcp_cwnd.jpg" alt="tcp_cwnd"></p>
 <p>TCP 连接建立后先经过 Slow Start 阶段，每收到一个 ACK，CWND 翻倍，数据发送率以指数形式增长，等出现丢包，或达到 ssthresh，或到达接收方 RWND 限制后进入 Congestion Avoidance 阶段</p>
+<h3 id="网络序-大小端"><a href="#网络序-大小端" class="headerlink" title="网络序 大小端"></a>网络序 大小端</h3><p>计算机系统在存储数据时起始地址是高地址还是低地址<br><img src="/images/net-seq.jpg" alt="tcp_seq"></p>
 
     </div>
 

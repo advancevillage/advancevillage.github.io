@@ -43,9 +43,9 @@
 <ul>
 <li><b>accpet 接收客户端链接</b><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;sys/types.h&gt;          /* See NOTES */</span><br><span class="line">#include &lt;sys/socket.h&gt;</span><br><span class="line"></span><br><span class="line">int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);</span><br><span class="line"></span><br><span class="line">#define _GNU_SOURCE             /* See feature_test_macros(7) */</span><br><span class="line">#include &lt;sys/socket.h&gt;</span><br><span class="line"></span><br><span class="line">int accept4(int sockfd, struct sockaddr *addr, socklen_t *addrlen, int flags);</span><br></pre></td></tr></table></figure>
 <h2 id="libevent-中何为读事件？何为写事件？"><a href="#libevent-中何为读事件？何为写事件？" class="headerlink" title="libevent 中何为读事件？何为写事件？"></a>libevent 中何为读事件？何为写事件？</h2>直观理解： </li>
-<li>有数据流入，可以进行读操作，即为读事件</li>
-<li>有剩余空间，可以进行写操作，即为写事件</li>
-<li>读写过程发生错误，即为错误事件</li>
+<li>有数据流入，可以进行读操作，即为读事件 BEV_EVENT_READING</li>
+<li>有剩余空间，可以进行写操作，即为写事件 BEV_EVENT_WRITING</li>
+<li>读写过程发生错误，即为错误事件. 包括BEV_EVENT_ERROR BEV_EVENT_TIMEOUT BEV_EVENT_EOF</li>
 </ul>
 <p>深入理解: 存在一个指定大小的缓存区, 存在3个基本属性缓存区总大小N, 当前写入长度P, 当前空闲长度Q = N-P </p>
 <ul>
@@ -59,7 +59,7 @@
 <li>Q &gt; mask  可以写操作， 触发写事件，通知处理函数写入数据 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">void bufferevent_setwatermark(struct bufferevent *bufev, short events,size_t lowmark, size_t highmark);</span><br></pre></td></tr></table></figure>
 <h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a><a target="_blank" rel="noopener" href="https://johng.cn/linux-c-libevent/">参考</a></h4></li>
 </ul>
-
+<h2 id="libevent-释放"><a href="#libevent-释放" class="headerlink" title="libevent 释放"></a>libevent 释放</h2>
     </div>
 
      
