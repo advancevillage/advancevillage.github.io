@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>
+        Large World! Small Me!
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            BPF
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><p>eBPF(extended BPF)支持<b>用户态将C语言编写内核中运行。</b>c bpf program<sup>   llvm</sup>BPF指令集的ELF文件<sup>  bpf_load_program</sup>内核检查<sup>   check_cfg/do_check</sup></p>
+<ul>
+<li>bpf_load_program is the bpf() system call</li>
+</ul>
+<h2 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">apt install libncurses5-dev flex bison libelf-dev binutils-dev libssl-dev bc rsync</span><br><span class="line">apt install clang</span><br><span class="line">apt install llvm</span><br></pre></td></tr></table></figure>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><ul>
+<li>内核下载 /usr/src/<ul>
+<li><a target="_blank" rel="noopener" href="http://cdn.kernel.org/pub/linux/kernel/v4.x/">4.x</a></li>
+<li><a target="_blank" rel="noopener" href="http://cdn.kernel.org/pub/linux/kernel/v5.x/">5.x</a></li>
+<li><blockquote>
+<p>= 4.16.9 </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1: make defconfig  //.config</span><br><span class="line">2: make prepare</span><br><span class="line">3: make scripts</span><br><span class="line">4: make headers_install</span><br><span class="line">5: make M=samples/bpf V=1</span><br></pre></td></tr></table></figure>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="ebpf-C-编程内核目录树"><a href="#ebpf-C-编程内核目录树" class="headerlink" title="ebpf C 编程内核目录树"></a>ebpf C 编程<a target="_blank" rel="noopener" href="https://elixir.bootlin.com/linux/latest/source/samples/bpf">内核目录树</a></h2><ul>
+<li>xxxx_kern.c</li>
+<li>xxxx_user.c</li>
+<li>示例 尝试编译通过 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//hello_kern.c</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;uapi/linux/bpf.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;bpf_helpers.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">SEC(<span class="string">&quot;tracepoint/syscalls/sys_enter_execve&quot;</span>)</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">trace_enter_execve</span><span class="params">(<span class="keyword">void</span> *ctx)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">char</span> msg[] = <span class="string">&quot;Hello BPF!\n&quot;</span>;</span><br><span class="line">	bpf_trace_printk(msg, <span class="keyword">sizeof</span>(msg));</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">char</span> _license[] SEC(<span class="string">&quot;license&quot;</span>) = <span class="string">&quot;GPL&quot;</span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//hello_user.c</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;bpf_load.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(load_bpf_file(<span class="string">&quot;hello_kern.o&quot;</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">	 	<span class="built_in">printf</span>(<span class="string">&quot;The kernel didn&#x27;t load BPF program\n&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	read_trace_pipe();</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>修改修改编译文件 samples/bpf/Makefile (4处位置)<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">45行:  hostprogs-y += hello</span><br><span class="line">96行:  hello-objs := bpf_load.o $(LIBBPF) hello_user.o</span><br><span class="line">149行: always += hello_kern.o</span><br><span class="line">194行: HOSTLOADLIBES_hello += -lelf</span><br><span class="line"></span><br><span class="line">make M=samples/bpf V=1</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="加载器-用户态程序加载ebpf程序到内核态"><a href="#加载器-用户态程序加载ebpf程序到内核态" class="headerlink" title="加载器(用户态程序加载ebpf程序到内核态)"></a>加载器(用户态程序加载ebpf程序到内核态)</h2><ul>
+<li>iproute2加载BPF程序到内核，因为iproute2包含加载BPF ELF加载器.<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip link set dev eth0 xdpgeneric obj xdp_pass_kern.o sec xdp </span><br></pre></td></tr></table></figure></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/libbpf/libbpf">LibBpf</a><ul>
+<li>代码:  git clone <a target="_blank" rel="noopener" href="https://github.com/libbpf/libbpf.git">https://github.com/libbpf/libbpf.git</a> | git checkout v0.4.0</li>
+<li>依赖:  libelf zlib <ul>
+<li>apt install -y libelf1 libelf-dev </li>
+<li>apt install -y zlib1g zlib1g-dev</li>
+</ul>
+</li>
+<li>头文件依赖软链设置<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/include</span><br><span class="line">ls -lh x86_64-linux-gnu/</span><br><span class="line"></span><br><span class="line">sudo ln -sf x86_64-linux-gnu/asm  asm</span><br><span class="line">sudo ln -sf x86_64-linux-gnu/bits bits</span><br><span class="line">sudo ln -sf x86_64-linux-gnu/gun  gnu</span><br><span class="line">sudo ln -sf x86_64-linux-gnu/sys  sys</span><br></pre></td></tr></table></figure></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/libbpf/libbpf-bootstrap/raw/master/tools/bpftool">BpfTool</a></li>
+<li><b>依赖内核构建</b><a target="_blank" rel="noopener" href="https://www.kernel.org/doc/html/latest/bpf/btf.html">BTF</a><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ls -lh /sys/kernel/btf/vmlinux</span><br><span class="line"></span><br><span class="line">bpftool btf dump file /sys/kernel/btf/vmlinux format c &gt; /usr/include/linux/vmlinux.h</span><br></pre></td></tr></table></figure></li>
+<li>推荐系统<ul>
+<li><a target="_blank" rel="noopener" href="https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-11.0.0-amd64-netinst.iso">Debian 11</a></li>
+</ul>
+</li>
+<li>推荐视频<iframe src="//player.bilibili.com/player.html?aid=502066204&bvid=BV1xN411Q7ux&cid=309914897&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
+
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="入门先研究libbpf-bootstrap"><a href="#入门先研究libbpf-bootstrap" class="headerlink" title="入门先研究libbpf-bootstrap"></a>入门先研究<a target="_blank" rel="noopener" href="https://github.com/libbpf/libbpf-bootstrap">libbpf-bootstrap</a></h2><ul>
+<li>XDP<br><img src="https://img-blog.csdnimg.cn/20200115144306615.png" alt="xpd"></li>
+</ul>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">动作</th>
+<th style="text-align:center">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">XDP_DROP</td>
+<td style="text-align:center">丢包</td>
+</tr>
+<tr>
+<td style="text-align:center">XDP_PASS</td>
+<td style="text-align:center">送入内核网络栈</td>
+</tr>
+<tr>
+<td style="text-align:center">XDP_TX</td>
+<td style="text-align:center">修改网络报并送入相同网卡(NIC)</td>
+</tr>
+<tr>
+<td style="text-align:center">XDP_REDIRECT</td>
+<td style="text-align:center">数据报重定向到其他支持XPD的网络设备(NIC)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">* 加载ebpf到网络设备</span><br><span class="line">```shell </span><br><span class="line">ip link set dev $(DEV_NAME) xdpgeneric obj $(OUTPUT)/sg.bpf.o sec xdp_test verbose</span><br><span class="line"></span><br><span class="line">ip link set dev $(DEV_NAME) xdpgeneric off</span><br><span class="line"></span><br><span class="line">* [检查bpftool](https://www.mankier.com) </span><br></pre></td></tr></table></figure>
+<p>— 检查maps<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash">  bpftool map show</span></span><br><span class="line"></span><br><span class="line">69: hash  name table  flags 0x0</span><br><span class="line">	key 4B  value 4B  max_entries 10  memlock 4096B</span><br><span class="line">74: array  flags 0x0</span><br><span class="line">	key 4B  value 32B  max_entries 1  memlock 4096B</span><br><span class="line">76: array  name pid_iter.rodata  flags 0x480</span><br><span class="line">	key 4B  value 4B  max_entries 1  memlock 8192B</span><br><span class="line">	btf_id 106  frozen</span><br><span class="line">	pids bpftool(102154)</span><br><span class="line">77: array  flags 0x0</span><br><span class="line">	key 4B  value 32B  max_entries 1  memlock 4096B</span><br><span class="line"></span><br><span class="line">-- 注入maps$ bpftool map update name table key hex c0 a8 7a e4 value hex 00 00 00 01  any</span><br><span class="line"></span><br><span class="line">-- 查看maps: bpftool map dump name table</span><br><span class="line">key: c0 a8 7a e4  value: 00 00 00 01</span><br><span class="line">Found 1 element</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html">如何持久化</a><ul>
+<li>防火墙maps持久化 Linux Pin 挂在到bpffs<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount bpffs/sys/fs/bpf -t bpf</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li>内存分配设置<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">rlimit</span> <span class="title">rlim_new</span> =</span> &#123;</span><br><span class="line">        .rlim_cur   = RLIM_INFINITY,  <span class="comment">/* Soft limit */</span></span><br><span class="line">        .rlim_max   = RLIM_INFINITY,  <span class="comment">/* Hard limit */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">setrlimit(RLIMIT_MEMLOCK, &amp;rlim_new);</span><br></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2></li>
+<li><a target="_blank" rel="noopener" href="https://lwn.net/Articles/740157/">A thorough introduction to eBPF</a></li>
+<li><a target="_blank" rel="noopener" href="https://qmonnet.github.io/whirl-offload/2016/09/01/dive-into-bpf/">a list of reading material</a></li>
+<li><a target="_blank" rel="noopener" href="https://davidlovezoe.club/wordpress/archives/1122">Linux BPF</a></li>
+</ul>
+
+    </div>
+
+     
+</div>
+
+    <div class="footer" id="footer">
+    <p>Copyright © 2020 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink" target="_blank" rel="noopener" href="https://github.com/sanjinhub/hexo-theme-geek">Geek</a>.
+        <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label>
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="CmCti21ooOOIzFOhEyFkFvR0-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="FqiyUqbg7McKN2eG0MCewupf">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+</body>
+
+</html>
