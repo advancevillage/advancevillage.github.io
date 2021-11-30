@@ -71,6 +71,47 @@
 </tbody>
 </table>
 </div>
+<h2 id="工具bpftool"><a href="#工具bpftool" class="headerlink" title="工具bpftool"></a>工具bpftool</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">wget https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.10.tar.gz</span><br><span class="line"></span><br><span class="line">tar -zxf linux-5.10.tar.gz</span><br><span class="line"></span><br><span class="line">cd linux-5.10/tools/bpf/bpftool</span><br><span class="line"></span><br><span class="line">apt install clang gcc mak</span><br><span class="line">apt install -y zlib1g zlib1g-dev</span><br><span class="line">apt install -y libelf1 libelf-dev</span><br><span class="line">apt install libcap-dev libcap2</span><br><span class="line"></span><br><span class="line">make V=1</span><br></pre></td></tr></table></figure>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">序号</th>
+<th style="text-align:center">注意事项</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">标准输出,无错误输出</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">创建,删除,更新成功返回null. 失败返回Err对象</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:center">查询失败返回Err对象数组</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:center">返回结果都是数组, 耗时500ms</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:center">字节序存储</td>
+</tr>
+<tr>
+<td style="text-align:center">6</td>
+<td style="text-align:center">重启配置策略失效</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="库libbpf"><a href="#库libbpf" class="headerlink" title="库libbpf"></a>库libbpf</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">apt install -y pkg-config</span><br><span class="line">apt install -y zlib1g zlib1g-dev</span><br><span class="line">apt install -y libelf1 libelf-dev</span><br><span class="line"></span><br><span class="line">git clone https://github.com/libbpf/libbpf.git </span><br><span class="line">cd src</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+<h2 id="加载BPF程序"><a href="#加载BPF程序" class="headerlink" title="加载BPF程序"></a>加载BPF程序</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">-- 方法一</span><br><span class="line">bpftool prog load test.bpf.o /sys/fs/bpf/test type xdp </span><br><span class="line"></span><br><span class="line">869: xdp  name xpd_handle_fw  tag 3b185187f1855c4c  gpl</span><br><span class="line">	loaded_at 2021-11-14T08:18:54+0800  uid 0</span><br><span class="line">	xlated 16B  jited 18B  memlock 4096B</span><br><span class="line">	btf_id 580</span><br><span class="line"></span><br><span class="line">root@debian:/sys/fs/bpf# tree -L 1</span><br><span class="line">                     .</span><br><span class="line">                     ├── ip -&gt; /sys/fs/bpf/tc/</span><br><span class="line">                     ├── tc</span><br><span class="line">                     ├── test</span><br><span class="line">                     ├── VYa2_v0_action</span><br><span class="line">                     ├── VYa2_v0_nw_dst</span><br><span class="line">                     ├── VYa2_v0_nw_src</span><br><span class="line">                     ├── VYa2_v0_proto</span><br><span class="line">                     ├── VYa2_v0_rule</span><br><span class="line">                     ├── VYa2_v0_tp_dst</span><br><span class="line">                     ├── VYa2_v0_tp_src</span><br><span class="line">                     └── xdp -&gt; /sys/fs/bpf/tc/</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">-- 方法二</span><br><span class="line">ip link set dev enp0s3 xdp pinned /sys/fs/bpf/test</span><br><span class="line">或</span><br><span class="line">ip link set dev enp0s3 xpd obj test.bpf.o sec xdp/fw </span><br><span class="line"></span><br><span class="line">enp0s3: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 xdpgeneric/id:869 qdisc pfifo_fast state UP group default qlen 1000</span><br><span class="line">    link/ether 08:00:27:f0:1e:41 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic enp0s3</span><br><span class="line">       valid_lft 83933sec preferred_lft 83933sec</span><br><span class="line">    inet6 fe80::a00:27ff:fef0:1e41/64 scope link</span><br><span class="line"></span><br><span class="line">ip 命令会在/sys/fs/bpf 创建tc目录</span><br></pre></td></tr></table></figure>
+<h2 id="加载BPF程序到Namespace"><a href="#加载BPF程序到Namespace" class="headerlink" title="加载BPF程序到Namespace"></a>加载BPF程序到Namespace</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">ip netns exec src ip link set dev src_lan xdp obj test.bpf.o sec xdp/fw  ✅</span><br><span class="line"></span><br><span class="line">src_lan@if3: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 xdp/id:887 qdisc noqueue state UP group default qlen 1000</span><br><span class="line">    link/ether 76:d2:26:42:1e:c4 brd ff:ff:ff:ff:ff:ff link-netnsid 0</span><br><span class="line">    inet 172.16.10.10/24 scope global src_lan</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::74d2:26ff:fe42:1ec4/64 scope link </span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"></span><br><span class="line">ip netns exec dst ip link set dev dst_lan xdp pinned /sys/fs/bpf/test  ❌</span><br><span class="line"></span><br><span class="line">💡: Couldn&#x27;t retrieve pinned program &#x27;/sys/fs/bpf/test&#x27;: No such file or directory</span><br><span class="line"></span><br><span class="line">/sys/fs/bpf 并未挂在到 dst Namespace空间中</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -127,6 +168,22 @@
     color: #669bfc;
 }
 </style>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
 </body>
 
 </html>
