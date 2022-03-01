@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>
+        Large World! Small Me!
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            GO 内存
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h2 id="思考🤔"><a href="#思考🤔" class="headerlink" title="思考🤔"></a>思考🤔</h2><p>GO内存管理吸取当前内存管理方式的种种优点，尤其是TCMalloc模型的处理方式，在效率和GC方面已经足够优秀，所以作为工程师学习它是必要的。在学习过程中，我在想内存管理的产生是随着计算机发展而产生的，所以我想如果回到学习的原点，即没有内存的话，就不需要管理，换句话说为什么需要内存🤔，或者现代是否已经发展到可以不依赖内存而运行的阶段?<br><img src="https://pic2.zhimg.com/80/v2-3195a8229fabb315f894ee6751d10121_1440w.jpg" alt="rate"><br><img src="https://pic1.zhimg.com/80/v2-7173130778f95493ece4bb181a4f1684_1440w.jpg" alt="price"><br>从图中看出，CPU寄存器存储速度快价格高，磁盘存储器速度慢价格低，我们总是需要可以持久化存储数据的介质，所以磁盘是不能被淘汰的。假设CPU直连磁盘协同工作会导致CPU非常空闲，CPU如此昂贵空闲意味着资源浪费成本上升，所以会想法设法榨干CPU。所以有没有一种介质介于CPU和DISK之间可以对冲速率差，BINGO, 内存。</p>
+<h2 id="内存分配基于物理内存"><a href="#内存分配基于物理内存" class="headerlink" title="内存分配基于物理内存"></a>内存分配基于物理内存</h2><p>进程是操作系统执行的基本单位，需要为其分配内存。内存分配是需要锁竞争。</p>
+<h2 id="内存分配基于虚拟内存"><a href="#内存分配基于虚拟内存" class="headerlink" title="内存分配基于虚拟内存"></a>内存分配基于虚拟内存</h2><p>内存虚拟化和多线程技术的出现，每个进程都有各自的虚拟内存空间，空间大小可以远超物理内存。内存分配粒度可以降维到进程内，由进程内的线程对进程自己的内存锁竞争。</p>
+<h2 id="进程内存"><a href="#进程内存" class="headerlink" title="进程内存"></a>进程内存</h2><p><img src="https://pic3.zhimg.com/v2-e31cd14b12214aefd979bb9885a3e546_r.jpg" alt="block"></p>
+<ul>
+<li>text: 代码区</li>
+<li>data: 无论是静态变量还是全局变量</li>
+<li>stack: 栈区 从高地址向低地址增长 内存管理简单操作SP指针 容量小 分配快</li>
+<li>heap:  堆区 从低地址向高地址增长 内存需要自身管理</li>
+</ul>
+<p>堆区分配是比较头疼的问题，内存碎片，OOM…</p>
+<p>内存分配需要锁竞争，高性能程序频繁分配内存是硬伤，有没有高效的分配方式🤔</p>
+<h2 id="GO内存"><a href="#GO内存" class="headerlink" title="GO内存"></a>GO内存</h2><p>go程序属于多线程程序，为了使线程内存分配高效，尽可能无锁，让每个线程都有各自的一块内存。</p>
+<p>可以参看这篇<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/76802887">博文</a>，写的很好。</p>
+<p>核心思路就是将对象分配，每个线程维护一块Cache，尽可能使用Cache，不够时再向全局申请(锁)，整体使锁的使用频率降低，提高效率。</p>
+<h2 id="GO逃逸分析"><a href="#GO逃逸分析" class="headerlink" title="GO逃逸分析"></a>GO逃逸分析</h2><ul>
+<li><p>Sharing down typically stays on the stack<br>在调用方创建的变量或对象，通过参数的形式传递给被调用函数，这时在调用方创建的内存空间通常在栈上。这种在调用方创建内存，在被调用方使用该内存的“内存共享”方式，称之为 Sharing down。</p>
+</li>
+<li><p>Sharing up typically escapes to the heap<br>在被调用函数内创建的对象，以指针的形式返回给调用方的情况下，通常，创建的内存空间在堆上。这种在被调用方创建，在调用方使用的“内存共享”方式，称之为 Sharing up。</p>
+</li>
+<li><p>Only the compiler knows<br>之所以上面两条原则都加了通常，因为具体的分配方式，是由编译器确定的，一些编译器后端优化，可能会突破这两个原则，因此，具体的分配逻辑，只有编译器开发工程师知道</p>
+</li>
+</ul>
+<h2 id="GOGC"><a href="#GOGC" class="headerlink" title="GOGC"></a>GOGC</h2><p>参考这篇<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/bfc3c65c05d1">文章</a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a target="_blank" rel="noopener" href="http://goog-perftools.sourceforge.net/doc/tcmalloc.html">TCMalloc</a></li>
+</ul>
+
+    </div>
+
+     
+</div>
+
+    <div class="footer" id="footer">
+    <p>Copyright © 2020 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink" target="_blank" rel="noopener" href="https://github.com/sanjinhub/hexo-theme-geek">Geek</a>.
+        <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label>
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="CmCti21ooOOIzFOhEyFkFvR0-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="FqiyUqbg7McKN2eG0MCewupf">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+</body>
+
+</html>
