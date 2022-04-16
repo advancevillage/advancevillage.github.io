@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>
+        Large World! Small Me!
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            GO Sync.RWLock
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h2 id="主题"><a href="#主题" class="headerlink" title="主题"></a>主题</h2><p>GoLang读写锁实现分析，宏观上读写锁具有的功能如下:</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">读锁</th>
+<th style="text-align:center">写锁</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">读锁</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">❌</td>
+</tr>
+<tr>
+<td style="text-align:center">写锁</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">❌</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>总结: 读锁加读锁，写锁全拒绝</p>
+<h2 id="你会怎么实现读写锁？"><a href="#你会怎么实现读写锁？" class="headerlink" title="你会怎么实现读写锁？"></a>你会怎么实现读写锁？</h2><ul>
+<li><p>定义读操作计数readerCount，锁定加一，解锁减一。就是对readerCount进行PV操作</p>
+</li>
+<li><p>定义写操作计数writerCount，锁定加一，解锁减一。就是对writerCount进行PV操作</p>
+</li>
+<li><p>readerCount 有区间范围 [0, 1&lt;&lt;32)</p>
+</li>
+<li><p>writerCount 有区间范围 [0, 1)</p>
+</li>
+<li><p>加读锁检查写锁计数，有值则阻塞读操作，否则放行</p>
+</li>
+<li><p>加写锁检查写锁和读锁计数，有值则阻塞写操作，否则放行</p>
+</li>
+</ul>
+<h3 id="读写锁结构定义"><a href="#读写锁结构定义" class="headerlink" title="读写锁结构定义"></a>读写锁结构定义</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">type</span> RWMutex <span class="keyword">struct</span> &#123;</span><br><span class="line">	w           Mutex  # held <span class="keyword">if</span> there are pending writers</span><br><span class="line">	writerSem   <span class="keyword">uint32</span> # semaphore <span class="keyword">for</span> writers to wait <span class="keyword">for</span> completing readers</span><br><span class="line">	readerSem   <span class="keyword">uint32</span> # semaphore <span class="keyword">for</span> readers to wait <span class="keyword">for</span> completing writers</span><br><span class="line">	readerCount <span class="keyword">int32</span>  # number of pending readers</span><br><span class="line">	readerWait  <span class="keyword">int32</span>  # number of departing readers</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> rwmutexMaxReaders = <span class="number">1</span> &lt;&lt; <span class="number">30</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">属性</th>
+<th style="text-align:center">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">w</td>
+<td style="text-align:center">互斥锁，保护写操作</td>
+</tr>
+<tr>
+<td style="text-align:center">writerSem</td>
+<td style="text-align:center">写操作信号量，用于阻塞或唤醒goroutine</td>
+</tr>
+<tr>
+<td style="text-align:center">readerSem</td>
+<td style="text-align:center">读操作信号量, 用于阻塞或唤醒goroutine</td>
+</tr>
+<tr>
+<td style="text-align:center">readerCount</td>
+<td style="text-align:center">读操作计数</td>
+</tr>
+<tr>
+<td style="text-align:center">readerWait</td>
+<td style="text-align:center">写锁锁定时，<b>快照当前读操作计数</b></td>
+</tr>
+<tr>
+<td style="text-align:center">rwmutexMaxReaders</td>
+<td style="text-align:center">读操作上限</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="写锁锁定"><a href="#写锁锁定" class="headerlink" title="写锁锁定"></a>写锁锁定</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">#注意: race 用于竞态分析 比如 <span class="keyword">go</span> run -race main.<span class="keyword">go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rw *RWMutex)</span> <span class="title">Lock</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> race.Enabled &#123;</span><br><span class="line">		_ = rw.w.state</span><br><span class="line">		race.Disable()</span><br><span class="line">	&#125;</span><br><span class="line">    #通过互斥锁保护写操作，若已存在写锁，那么运行到这里时阻塞</span><br><span class="line">	rw.w.Lock()</span><br><span class="line"></span><br><span class="line">    #写锁时检查读操作计数rw.readerWait，</span><br><span class="line">    # </span><br><span class="line">    #   r := atomic.AddInt32(&amp;rw.readerCount, -rwmutexMaxReaders) + rwmutexMaxReaders</span><br><span class="line">    #</span><br><span class="line">    #那么r就是运行前的rw.readerWait且r &gt;= <span class="number">0</span>,</span><br><span class="line">    #</span><br><span class="line">    #  rw.readerCount 变成负数</span><br><span class="line">    #</span><br><span class="line">    #也就表明当rw.readerCount为负数时，存在写操作等待</span><br><span class="line">    #</span><br><span class="line">	r := atomic.AddInt32(&amp;rw.readerCount, -rwmutexMaxReaders) + rwmutexMaxReaders</span><br><span class="line"></span><br><span class="line">    # r  = <span class="number">0</span>, 表示没有读锁，可以执行写操作</span><br><span class="line">    # r != <span class="number">0</span>, 存在读操作，那么阻塞写操作，同时记录待执行读操作的数量</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> r != <span class="number">0</span> &amp;&amp; atomic.AddInt32(&amp;rw.readerWait, r) != <span class="number">0</span> &#123;</span><br><span class="line">        #</span><br><span class="line">        #runtime_SemacquireMutex runtime库提供</span><br><span class="line">        #</span><br><span class="line">		runtime_SemacquireMutex(&amp;rw.writerSem, <span class="literal">false</span>, <span class="number">0</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> race.Enabled &#123;</span><br><span class="line">		race.Enable()</span><br><span class="line">		race.Acquire(unsafe.Pointer(&amp;rw.readerSem))</span><br><span class="line">		race.Acquire(unsafe.Pointer(&amp;rw.writerSem))</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://github.com/golang/go/blob/2ebe77a2fda1ee9ff6fd9a3e08933ad1ebaea039/src/runtime/sema.go#L70">runtime_SemacquireMutex</a></p>
+<h3 id="读锁锁定"><a href="#读锁锁定" class="headerlink" title="读锁锁定"></a>读锁锁定</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">#注意: race 用于竞态分析 比如 <span class="keyword">go</span> run -race main.<span class="keyword">go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rw *RWMutex)</span> <span class="title">RLock</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> race.Enabled &#123;</span><br><span class="line">		_ = rw.w.state</span><br><span class="line">		race.Disable()</span><br><span class="line">	&#125;</span><br><span class="line">    #</span><br><span class="line">    # atomic.AddInt32(&amp;rw.readerCount, <span class="number">1</span>) 即</span><br><span class="line">    #</span><br><span class="line">    #   rw.readerCount = rw.readerCount + <span class="number">1</span></span><br><span class="line">    #</span><br><span class="line">    # rw.readerCount &gt; <span class="number">0</span> 无写操作，都是度操作</span><br><span class="line">    #</span><br><span class="line">    # rw.readerCount &lt; <span class="number">0</span> 存在申请写操作, 因为在写锁操作中将 rw.readerCount 设置为负数, 并阻塞读操作</span><br><span class="line">    #</span><br><span class="line">	<span class="keyword">if</span> atomic.AddInt32(&amp;rw.readerCount, <span class="number">1</span>) &lt; <span class="number">0</span> &#123;</span><br><span class="line">        #</span><br><span class="line">        #runtime_SemacquireMutex runtime库提供</span><br><span class="line">        #</span><br><span class="line">		runtime_SemacquireMutex(&amp;rw.readerSem, <span class="literal">false</span>, <span class="number">0</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> race.Enabled &#123;</span><br><span class="line">		race.Enable()</span><br><span class="line">		race.Acquire(unsafe.Pointer(&amp;rw.readerSem))</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://github.com/golang/go/blob/2ebe77a2fda1ee9ff6fd9a3e08933ad1ebaea039/src/runtime/sema.go#L70">runtime_SemacquireMutex</a></p>
+<h3 id="写锁解锁"><a href="#写锁解锁" class="headerlink" title="写锁解锁"></a>写锁解锁</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rw *RWMutex)</span> <span class="title">Unlock</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> race.Enabled &#123;</span><br><span class="line">		_ = rw.w.state</span><br><span class="line">		race.Release(unsafe.Pointer(&amp;rw.readerSem))</span><br><span class="line">		race.Disable()</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    #</span><br><span class="line">    # r := atomic.AddInt32(&amp;rw.readerCount, rwmutexMaxReaders)</span><br><span class="line">    #</span><br><span class="line">    # 将rw.readerCount 设置成正数，恢复读锁锁定</span><br><span class="line">    #</span><br><span class="line">    #GoLang 将rw.readerCount 正负区分读写操作，实在是妙</span><br><span class="line">    #</span><br><span class="line">	r := atomic.AddInt32(&amp;rw.readerCount, rwmutexMaxReaders)</span><br><span class="line"></span><br><span class="line">    #</span><br><span class="line">    #超过区间范围，报错</span><br><span class="line">    #</span><br><span class="line">    #例如：</span><br><span class="line">    #   未写锁锁定，直接写锁解锁，那么r = rwmutexMaxReaders  </span><br><span class="line">    #     读锁锁定，直接写锁解锁，那么r &gt; rwmutexMaxReaders  </span><br><span class="line">	<span class="keyword">if</span> r &gt;= rwmutexMaxReaders &#123;</span><br><span class="line">		race.Enable()</span><br><span class="line">		throw(<span class="string">&quot;sync: Unlock of unlocked RWMutex&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    #</span><br><span class="line">    #唤醒全部被阻塞的读操作</span><br><span class="line">    #</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="keyword">int</span>(r); i++ &#123;</span><br><span class="line">		runtime_Semrelease(&amp;rw.readerSem, <span class="literal">false</span>, <span class="number">0</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    #</span><br><span class="line">    # 释放互斥锁，允许下一个写操作</span><br><span class="line">    #</span><br><span class="line">	rw.w.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> race.Enabled &#123;</span><br><span class="line">		race.Enable()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://github.com/golang/go/blob/2ebe77a2fda1ee9ff6fd9a3e08933ad1ebaea039/src/runtime/sema.go#L65">runtime_Semrelease</a></p>
+<h3 id="读锁解锁"><a href="#读锁解锁" class="headerlink" title="读锁解锁"></a>读锁解锁</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rw *RWMutex)</span> <span class="title">RUnlock</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> race.Enabled &#123;</span><br><span class="line">		_ = rw.w.state</span><br><span class="line">		race.ReleaseMerge(unsafe.Pointer(&amp;rw.writerSem))</span><br><span class="line">		race.Disable()</span><br><span class="line">	&#125;</span><br><span class="line">    #</span><br><span class="line">    # r := atomic.AddInt32(&amp;rw.readerCount, <span class="number">-1</span>)</span><br><span class="line">    #</span><br><span class="line">    # 若无写锁，那么 r &gt;= <span class="number">0</span> ,直接放行，称之为快路径</span><br><span class="line">    #</span><br><span class="line">    # 若有写锁，那么 r &lt; <span class="number">0</span>, 进入慢路径</span><br><span class="line">    #</span><br><span class="line">	<span class="keyword">if</span> r := atomic.AddInt32(&amp;rw.readerCount, <span class="number">-1</span>); r &lt; <span class="number">0</span> &#123;</span><br><span class="line">		rw.rUnlockSlow(r)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> race.Enabled &#123;</span><br><span class="line">		race.Enable()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># r &lt; <span class="number">0</span> </span><br><span class="line">#</span><br><span class="line"># r + <span class="number">1</span> = <span class="number">0</span>:  </span><br><span class="line">#   (<span class="number">1</span>)意味着读操作数量已超过设定值。写锁锁定将rw.readerCount - rwmutexMaxReaders， 意味rw.readerCount 将会从-rwmutexMaxReaders增长到<span class="number">-1</span></span><br><span class="line">#</span><br><span class="line">#   (<span class="number">2</span>)未读锁锁定，直接读锁解锁</span><br><span class="line">#</span><br><span class="line"># r + <span class="number">1</span> = -rwmutexMaxReaders:</span><br><span class="line">#   (<span class="number">1</span>)极限情况读操作数量rwmutexMaxReaders时申请写操作，那么rw.readerCount = rwmutexMaxReaders - rwmutexMaxReaders = <span class="number">0</span></span><br><span class="line">#   在写锁未解锁前，读操作陆续解锁，即rw.readerCount--，直到rw.readerCount = -rwmutexMaxReaders。若继续解锁，那么报错</span><br><span class="line">#</span><br><span class="line">#</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rw *RWMutex)</span> <span class="title">rUnlockSlow</span><span class="params">(r <span class="keyword">int32</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> r+<span class="number">1</span> == <span class="number">0</span> || r+<span class="number">1</span> == -rwmutexMaxReaders &#123;</span><br><span class="line">		race.Enable()</span><br><span class="line">		throw(<span class="string">&quot;sync: RUnlock of unlocked RWMutex&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">    #</span><br><span class="line">    # rw.readerWait 是申请写操锁时当前待执行读操作的数量</span><br><span class="line">    #</span><br><span class="line">    # rw.readerWait = <span class="number">0</span> 表示已无操作，可以唤醒写操作</span><br><span class="line">    #</span><br><span class="line">	<span class="keyword">if</span> atomic.AddInt32(&amp;rw.readerWait, <span class="number">-1</span>) == <span class="number">0</span> &#123;</span><br><span class="line">		runtime_Semrelease(&amp;rw.writerSem, <span class="literal">false</span>, <span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://github.com/golang/go/blob/2ebe77a2fda1ee9ff6fd9a3e08933ad1ebaea039/src/runtime/sema.go#L65">runtime_Semrelease</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>GoLang sync.RWLock 基于sync.Mutex实现，逻辑清晰，简化实现。 sync.Mutex实现相对复杂，下期分享</p>
+
+    </div>
+
+     
+</div>
+
+    <div class="footer" id="footer">
+    <p>Copyright © 2020 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink" target="_blank" rel="noopener" href="https://github.com/sanjinhub/hexo-theme-geek">Geek</a>.
+        <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label>
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="CmCti21ooOOIzFOhEyFkFvR0-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="FqiyUqbg7McKN2eG0MCewupf">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+</body>
+
+</html>

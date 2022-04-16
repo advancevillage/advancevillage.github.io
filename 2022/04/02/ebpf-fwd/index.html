@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>
+        Large World! Small Me!
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            eBPF/XDP Forward
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>传统网络转发路径是从 L2àL3，查询路由表然后转发，中间解析报文且分配 SKB。 XDP 转 发路径可以下沉 L2, 解析报文再封装，无 SKB 分配，高效且快速。<br><img src="/images/ebpf-forward.png" alt="ebpf-xdp-forward"></p>
+<h2 id="技术"><a href="#技术" class="headerlink" title="技术"></a>技术</h2><ul>
+<li>ebpf<ul>
+<li>bpf_map_update_elem:  更新ebpf表项</li>
+<li>bpf_map_lookup_elem:  查询ebpf表项</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/torvalds/linux/blob/3123109284176b1532874591f7c81f3837bbdc17/net/core/filter.c#L5915">bpf_fib_lookup</a>:       查询路由<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">BPF_FIB_LKUP_RET_SUCCESS,      /* lookup successful */</span><br><span class="line">BPF_FIB_LKUP_RET_BLACKHOLE,    /* dest is blackholed; can be dropped */</span><br><span class="line">BPF_FIB_LKUP_RET_UNREACHABLE,  /* dest is unreachable; can be dropped */</span><br><span class="line">BPF_FIB_LKUP_RET_PROHIBIT,     /* dest not allowed; can be dropped */</span><br><span class="line">BPF_FIB_LKUP_RET_NOT_FWDED,    /* packet is not forwarded */              表示报文非转发报文，应该是本机接受该报文</span><br><span class="line">BPF_FIB_LKUP_RET_FWD_DISABLED, /* fwding is not enabled on ingress */     表示系统未开启网络设备功能 sysctl net.ipv&#123;4,6&#125;.conf.all.forwarding = 1</span><br><span class="line">BPF_FIB_LKUP_RET_UNSUPP_LWT,   /* fwd requires encapsulation */</span><br><span class="line">BPF_FIB_LKUP_RET_NO_NEIGH,     /* no neighbor entry for nh */             表示未查到邻近表匹配项，即查询不到mac地址，交由内核处理</span><br><span class="line">BPF_FIB_LKUP_RET_FRAG_NEEDED,  /* fragmentation required to fwd */</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bpf_fib_lookup</span><br><span class="line">    --&gt; bpf_ipv4_fib_lookup</span><br><span class="line">        ...</span><br><span class="line">        ---&gt; nl_fib_lookup</span><br><span class="line">    --&gt; bpf_ipv6_fib_lookup</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://github.com/torvalds/linux/blob/3123109284176b1532874591f7c81f3837bbdc17/net/ipv4/fib_frontend.c#L1333">nl_fib_lookup</a></p>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>使用eBPF在XDP的HOOK, 可以提前处理报文。在XDP解析报文，提取目的IP，然后查询路由，存储到MAP，后续报文由于可以直接使用MAP结果进行转发，路径短且高效。</p>
+<h2 id="遗留问题"><a href="#遗留问题" class="headerlink" title="遗留问题"></a>遗留问题</h2><p>如果路由表发生变换或者网络设备发生变化，XDP是感受不到的，可以依赖上层控制面对账处理。</p>
+
+    </div>
+
+     
+</div>
+
+    <div class="footer" id="footer">
+    <p>Copyright © 2020 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink" target="_blank" rel="noopener" href="https://github.com/sanjinhub/hexo-theme-geek">Geek</a>.
+        <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label>
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="CmCti21ooOOIzFOhEyFkFvR0-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="FqiyUqbg7McKN2eG0MCewupf">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+</body>
+
+</html>

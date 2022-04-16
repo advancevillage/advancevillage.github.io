@@ -21,81 +21,20 @@
 
 
 <body id="bodyx">
-    <div class="hd logodiv">
-    <img src="/img/cover.jpeg" width="100%">
-    <p class="logot">dBoy</p>
-</div>
-<div class="hd">
-    <ol class="breadcrumb">
-        
-            <li><a class="ba" href="/project">作品</a></li>
-        
-            <li><a class="ba" href="/links">友联</a></li>
-        
-            <li><a class="ba" href="/about">关于</a></li>
-        
-            <li><a class="ba" target="_blank" rel="noopener" href="https://github.com/advancevillage">GIT</a></li>
-        
-    </ol>
-    <hr class="breadcrumbhr">
-</div>
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h2 id="Q1-描述GO调度方式"><a href="#Q1-描述GO调度方式" class="headerlink" title="Q1: 描述GO调度方式"></a>Q1: 描述GO调度方式</h2><p>GO在语言层面高效支持并发，在用户态空间实现goroutine调度逻辑。调度模型是GPM，每个P在运行时绑定一个M且本地维护goroutine队列，当本地队列待处理的goroutine不足时，向全局goroutinue队列或者其他P的本地队列获取goroutine处理。</p>
+<h2 id="Q2-GO-Struct-是否可以比较"><a href="#Q2-GO-Struct-是否可以比较" class="headerlink" title="Q2: GO Struct 是否可以比较"></a>Q2: GO Struct 是否可以比较</h2><h2 id="Q3-互斥锁，读写度实现原理以及死锁的条件"><a href="#Q3-互斥锁，读写度实现原理以及死锁的条件" class="headerlink" title="Q3: 互斥锁，读写度实现原理以及死锁的条件"></a>Q3: 互斥锁，读写度实现原理以及死锁的条件</h2><h2 id="Q4-Context包作用和Select作用"><a href="#Q4-Context包作用和Select作用" class="headerlink" title="Q4: Context包作用和Select作用"></a>Q4: Context包作用和Select作用</h2><h2 id="Q5-进程，线程，协程"><a href="#Q5-进程，线程，协程" class="headerlink" title="Q5: 进程，线程，协程"></a>Q5: 进程，线程，协程</h2><h2 id="Q6-利用channel实现消息队列，多生成者，多消费者"><a href="#Q6-利用channel实现消息队列，多生成者，多消费者" class="headerlink" title="Q6: 利用channel实现消息队列，多生成者，多消费者"></a>Q6: 利用channel实现消息队列，多生成者，多消费者</h2><h2 id="Q7-GO-GC"><a href="#Q7-GO-GC" class="headerlink" title="Q7: GO GC"></a>Q7: GO GC</h2>
+    </div>
 
-<div class="hd">
-    
-    
-        
-        
-            <div class="titlex">
-                <p><span class="jing">#</span>
-                    2022
-                </p>
-            </div>
-            
-        
-        <a class="flink" href="/2022/04/02/ebpf-fwd/">
-            <div class="list">
-                <div class="postname">
-                    eBPF/XDP Forward
-                </div>
-                <div class="posttime">
-                    April 2nd
-                </div>
-            </div>
-        </a>
-    
-        
-        
-            <div class="titlex">
-                <p><span class="jing">#</span>
-                    2021
-                </p>
-            </div>
-            
-        
-        <a class="flink" href="/2021/11/11/bpf-fw/">
-            <div class="list">
-                <div class="postname">
-                    BPF Firewall
-                </div>
-                <div class="posttime">
-                    November 11th
-                </div>
-            </div>
-        </a>
-    
-        
-        
-        <a class="flink" href="/2021/08/08/bpf-env/">
-            <div class="list">
-                <div class="postname">
-                    BPF
-                </div>
-                <div class="posttime">
-                    August 8th
-                </div>
-            </div>
-        </a>
-    
+     
 </div>
 
     <div class="footer" id="footer">
